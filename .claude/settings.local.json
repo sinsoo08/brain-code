@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(BASE=\"C:/Users/qldnc/IdeaProjects/App_for_the_disabled_person/.claude/worktrees/brave-buck\" echo \"=== FRONTEND ===\")",
+      "Read(//c/Users/qldnc/IdeaProjects/App_for_the_disabled_person/.claude/worktrees/brave-buck/$BASE/**)",
+      "Read(//c/Users/qldnc/IdeaProjects/App_for_the_disabled_person/.claude/worktrees/brave-buck/**)"
+    ]
+  }
+}

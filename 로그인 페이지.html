@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 페이지</title>
+    <link rel="icon" href="img/뇌.png" type="image/png">
+    <style>
+        header{
+            position: fixed;
+            top: 0;
+            width: 100%;
+        }
+        
+        body{
+            margin: 0;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            background-color: #2F6FD6;
+            padding: 15px 30px;
+        }
+
+        .logo {
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .menu {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        .menu a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .menu a:hover {
+            color: #ffcc00;
+        }
+    
+    #alert-box {
+        position: fixed;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #28a745;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 0 0 4px 4px;
+        font-weight: bold;
+        display: none;
+        z-index: 1000;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+</style>
+</head>
+    <body>
+        <nav class="navbar">
+        <div class="logo">브레인 코드</div>
+            <ul class="menu">
+                <li><a href="메인 페이지.html">홈</a></li>
+                <li><a href="회원가입 페이지.html">회원가입</a></li>
+            </ul>
+        </nav>
+        이메일 <input type="email" id="emailInput"><br>
+        비밀번호 <input type="password" id="passwordInput"><br>
+
+        <input type="button" value="로그인" onclick="login()">
+
+        <div id="alert-box"></div>
+
+        <script>
+            function showAlert(message) {
+            const alertBox = document.getElementById("alert-box");
+            alertBox.textContent = message;
+            alertBox.style.display = "block";
+
+            setTimeout(() => {
+               alertBox.style.display = "none";
+            }, 3000);
+        }
+
+            function login() {
+                const email = document.getElementById("emailInput").value;
+                const pw = document.getElementById("passwordInput").value;
+
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+            if (!email || !pw) {
+                showAlert("이메일과 비밀번호를 입력해주세요!");
+                return;
+            }
+
+            if (!emailPattern.test(email)) {
+                showAlert("올바른 이메일 형식을 입력해주세요!");
+                return;
+            }
+
+            localStorage.setItem("isLoggedIn", "true");
+            localStorage.setItem("userEmail", email);
+
+            showAlert("로그인이 되었습니다!");
+
+            setTimeout(() => {
+                window.location.href = "프로필 페이지.html";
+            }, 1000);
+            }
+        </script>
+    </body>
+</html>

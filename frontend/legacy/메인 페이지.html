@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>브레인 코드</title>
+    <link rel="icon" href="img/뇌.png" type="image/png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+
+    <style>
+        body{
+            margin: 0;
+            background-color: #F4F9FF;
+        }
+
+        header{
+            position: fixed;
+            top: 0;
+            width: 100%;
+        }
+        
+        p{
+            margin: 0;
+            font-family: Pretendard, sans-serif;
+
+            position: relative;
+            left: 60px;
+
+            margin-top: 0;
+            font-size: x-large;
+        }
+
+        h1, h2{
+            font-family: Jua, sans-serif;
+            font-weight: 500;
+
+            position: relative;
+            left: 60px;
+
+            margin-bottom: 10px;
+            font-size: 3rem;
+        }
+
+        button {
+            height: 48px;
+            padding: 0 24px;
+            font-size: 16px;
+            border-radius: 12px;
+
+            background-color: #3B82F6;
+            color: white;
+
+            position: relative;
+            left: 60px;
+
+            border: none;
+        }
+
+        button span {
+            display: inline-block;
+            transition: transform 0.2s;
+        }
+
+        button:hover span {
+            transform: translateX(5px);
+        }
+
+        .arrow {
+            margin-left: 8px;
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            background-color: #2F6FD6;
+            padding: 15px 30px;
+        }
+
+        .logo {
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .menu {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        .menu a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .menu a:hover {
+            color: #ffcc00;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">브레인 코드</div>
+    
+        <ul class="menu">
+            <li><a href="로그인 페이지.html">로그인</a></li>
+            <li><a href="회원가입 페이지.html">회원가입</a></li>
+        </ul>
+    </nav>
+
+    <div class="div1">
+    <h1>
+        발달장애 아동을 위한<br>
+        인지 훈련 게임 플랫폼
+    </h1>
+
+    <p>
+        아이의 인지능력과 소통능력을 키워요!<br>
+        다양한 게임으로 즐겁게 학습해요!<br>
+    </p>
+    </div>
+
+    <br>
+
+    <button onclick="location.href='로그인 페이지.html'">
+        지금 무료로 시작하기<span class="arrow">></span>
+    </button>
+
+</body>
+</html>
