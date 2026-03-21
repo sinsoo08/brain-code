@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>뇌 훈련 게임</title>
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: "Pretendard", "Jua", sans-serif;
+    background: #ecf4fd;
+    color: #2b2b2b;
+    text-align: center;
+    padding: 16px;
+  }
+
+  .wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  h1, h2, p {
+    margin: 8px 0;
+  }
+
+  h1, h2 {
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+  .top-card {
+    background: #f8fbff;
+    border: 2px solid #d9e8f7;
+    border-radius: 20px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+  }
+
+  .status-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .box {
+    min-width: 220px;
+    background: #ffffff;
+    border: 2px solid #dbe9f8;
+    border-radius: 16px;
+    padding: 10px 14px;
+  }
+
+  .canvas-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 14px;
+  }
+
+  canvas {
+    width: min(100%, 1200px);
+    height: auto;
+    border: 2px solid #cfe0f2;
+    border-radius: 20px;
+    background: #ffffff;
+    touch-action: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+  }
+
+  .bottom-bar {
+    margin-top: 14px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  button {
+    min-width: 60px;
+    min-height: 60px;
+    padding: 12px 18px;
+    font-size: 18px;
+    border: none;
+    border-radius: 16px;
+    background: #dff0ff;
+    color: #234;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    font-family: inherit;
+  }
+
+  button:hover {
+    filter: brightness(0.98);
+  }
+
+  #messageBox {
+    min-height: 64px;
+    padding: 14px 18px;
+    border-radius: 18px;
+    background: #ffffff;
+    border: 2px solid #dbe9f8;
+    color: #355;
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    body {
+      padding: 10px;
+    }
+
+    .top-card {
+      padding: 12px;
+    }
+
+    .box {
+      min-width: 150px;
+      font-size: 15px;
+    }
+
+    #messageBox {
+      font-size: 17px;
+      min-height: 72px;
+    }
+
+    button {
+      font-size: 16px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top-card">
+    <h2 id="title">🧠 마우스를 올리거나 터치하면 해당 부위가 보입니다</h2>
+    <div class="status-row">
+      <div class="box" id="brainName">현재 위치: 없음</div>
+      <div class="box" id="coords">좌표: (0, 0)</div>
+    </div>
+  </div>
+
+  <div class="canvas-wrap">
+    <canvas id="brainCanvas"></canvas>
+  </div>
+
+  <div class="bottom-bar">
+    <button id="homeBtn" style="display:none;">처음으로</button>
+  </div>
+
+  <div class="bottom-bar">
+    <div id="messageBox">하고 싶은 게임을 눌러보세요</div>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById("brainCanvas");
+const ctx = canvas.getContext("2d");
+const titleText = document.getElementById("title");
+const brainText = document.getElementById("brainName");
+const coordsText = document.getElementById("coords");
+const homeBtn = document.getElementById("homeBtn");
+const messageBox = document.getElementById("messageBox");
+
+const BASE_W = 1200;
+const BASE_H = 700;
+
+canvas.width = BASE_W;
+canvas.height = BASE_H;
+
+const img = new Image();
+img.src = "뇌.png";
+
+const scale = 1.3;
+let imgX = 0;
+let imgY = 0;
+let imgW = 0;
+let imgH = 0;
+
+let mode = "map";
+let currentRegion = "";
+let hoveredRegion = "";
+let gameData = null;
+let gameTimer = null;
+let gameInterval = null;
+let messageTimer = null;
+
+const pastelRed = "#FFAAAA";
+const pastelYellow = "#FFF3AA";
+const pastelGreen = "#AAFFCC";
+const pastelBlue = "#CFE8FF";
+const pastelPurple = "#E7D6FF";
+const pastelOrange = "#FFD8A8";
+const pastelMint = "#D9FFE8";
+const pastelPink = "#FFE0EC";
+const pastelCard = "#F8FBFF";
+const lineColor = "#5c6f82";
+
+const frontal = [
+  [471,431],[463,431],[455,431],[450,431],[443,431],[438,431],[432,431],[429,431],[424,431],[413,429],
+  [408,427],[404,425],[398,424],[395,422],[392,420],[388,418],[384,417],[380,416],[375,414],[372,411],
+  [369,411],[368,409],[362,406],[359,405],[357,402],[354,401],[350,395],[350,393],[348,387],[346,382],
+  [346,379],[345,375],[342,373],[341,371],[338,368],[337,364],[335,362],[334,359],[332,357],[330,354],
+  [330,348],[327,341],[326,336],[326,332],[327,331],[330,325],[331,320],[332,317],[330,314],[327,309],
+  [327,305],[325,298],[323,294],[325,289],[325,285],[325,278],[328,271],[328,269],[328,266],[331,262],
+  [332,255],[332,254],[335,251],[338,244],[341,239],[342,235],[342,231],[343,230],[345,224],[347,219],
+  [350,217],[352,217],[355,211],[358,207],[361,204],[365,201],[368,195],[372,191],[373,190],[377,185],
+  [379,181],[384,174],[388,169],[392,165],[395,163],[397,160],[400,158],[402,156],[406,153],[409,151],
+  [415,147],[420,145],[422,144],[427,141],[429,140],[433,140],[438,140],[440,140],[444,134],[445,133],
+  [448,131],[451,127],[454,126],[456,125],[460,122],[463,120],[465,117],[470,115],[476,113],[481,110],
+  [485,107],[488,106],[494,104],[498,104],[505,102],[515,97],[519,95],[524,95],[532,94],[537,94],
+  [541,95],[545,95],[548,95],[551,95],[553,95],[555,94],[557,93],[560,91],[562,91],[565,90],
+  [567,90],[569,85],[576,83],[582,83],[585,80],[588,81],[591,81],[594,83],[596,83],[599,83],
+  [603,81],[605,81],[605,81],[608,83],[615,81],[616,80],[622,83],[628,80],[634,80],[649,80],
+  [657,80],[663,80],[668,83],[672,86],[676,86],[680,86],[685,90],[686,94],[687,98],[688,103],
+  [687,105],[686,111],[686,115],[685,122],[683,126],[682,127],[677,133],[674,134],[671,141],[668,143],
+  [665,146],[665,147],[662,149],[662,151],[659,152],[657,154],[652,160],[651,162],[647,167],[647,167],
+  [644,170],[643,172],[640,175],[636,181],[633,184],[629,184],[625,189],[628,188],[627,191],[625,192],
+  [625,194],[623,199],[620,204],[618,208],[615,215],[615,217],[615,221],[614,230],[614,232],[614,237],
+  [614,243],[614,247],[614,253],[615,254],[615,257],[615,259],[615,266],[615,269],[615,277],[615,277],
+  [615,281],[615,281],[615,286],[615,287],[615,291],[615,298],[615,307],[615,310],[615,312],[615,315],
+  [614,318],[612,321],[609,323],[606,325],[603,326],[601,327],[596,327],[593,327],[589,329],[585,330],
+  [581,331],[577,332],[574,333],[570,333],[566,334],[559,336],[552,339],[545,339],[541,341],[536,344],
+  [533,346],[531,347],[529,350],[525,352],[525,354],[521,357],[518,359],[514,365],[509,367],[507,369],
+  [504,370],[502,373],[500,375],[497,378],[495,379],[493,381],[491,384],[489,386],[488,387],[488,389],
+  [484,391],[482,395],[479,400],[477,404],[477,407],[475,411],[475,413],[472,419],[472,421],[472,426],
+  [472,427]
+];
+
+const parietal = [
+  [615,317],[615,313],[615,307],[614,301],[614,294],[614,291],[614,285],[615,279],[615,270],[615,264],
+  [615,257],[615,252],[615,248],[615,239],[615,237],[616,231],[618,223],[615,217],[618,214],[619,205],
+  [621,201],[622,197],[624,194],[626,190],[631,184],[635,180],[642,171],[643,167],[648,162],[652,160],
+  [654,157],[659,153],[664,150],[668,146],[670,142],[675,135],[678,133],[681,128],[684,123],[686,117],
+  [689,109],[690,106],[691,101],[691,96],[692,91],[696,89],[700,86],[702,84],[706,84],[709,84],
+  [717,84],[725,85],[728,87],[731,89],[734,90],[738,91],[745,93],[753,95],[755,96],[760,100],
+  [766,104],[774,103],[779,104],[783,105],[787,108],[792,111],[794,112],[798,114],[804,115],[810,119],
+  [812,120],[817,123],[819,125],[822,127],[824,128],[826,130],[830,132],[833,134],[835,136],[840,141],
+  [841,141],[845,144],[847,147],[849,149],[851,150],[852,151],[855,154],[858,155],[862,161],[863,164],
+  [865,166],[866,169],[868,174],[869,175],[872,177],[877,181],[883,187],[881,184],[885,187],[889,190],
+  [892,191],[898,198],[899,201],[902,205],[904,207],[906,212],[909,216],[910,217],[912,224],[914,227],
+  [914,234],[915,238],[915,240],[915,241],[914,243],[911,243],[906,244],[905,244],[899,247],[898,248],
+  [894,254],[892,257],[889,261],[888,263],[888,264],[885,267],[885,267],[884,271],[883,274],[882,275],
+  [882,278],[881,280],[878,281],[878,284],[876,286],[873,291],[874,291],[873,294],[872,296],[871,299],
+  [868,302],[866,307],[865,308],[865,308],[862,311],[857,314],[857,315],[855,318],[852,322],[850,324],
+  [848,327],[847,327],[845,328],[843,329],[840,333],[838,334],[834,337],[833,339],[832,340],[828,338],
+  [825,337],[822,337],[822,336],[819,336],[815,337],[815,337],[811,337],[806,334],[805,333],[802,332],
+  [801,331],[798,329],[796,328],[792,328],[790,327],[786,327],[782,325],[779,321],[777,320],[775,320],
+  [773,317],[771,316],[768,316],[765,315],[765,315],[758,310],[757,307],[755,305],[753,302],[748,301],
+  [745,300],[742,299],[738,297],[737,295],[733,291],[728,290],[722,289],[721,289],[716,288],[712,287],
+  [708,288],[705,289],[699,289],[698,289],[691,290],[688,290],[685,291],[682,291],[677,292],[672,294],
+  [666,295],[664,296],[662,297],[661,297],[658,297],[657,297],[655,300],[647,302],[647,303],[645,304],
+  [645,304],[640,304],[639,305],[636,306],[632,307],[629,308],[623,311],[619,312],[618,313],[617,313],
+  [617,313]
+];
+
+const temporal = [
+  [478,451],[476,445],[475,440],[474,435],[473,434],[472,431],[472,426],[472,424],[471,423],[473,418],
+  [473,417],[475,412],[476,407],[476,407],[478,403],[481,401],[480,399],[482,397],[486,394],[486,392],
+  [489,389],[494,386],[495,384],[497,381],[500,377],[502,375],[505,372],[509,367],[513,364],[515,362],
+  [524,356],[528,353],[531,349],[537,346],[538,345],[541,343],[544,342],[545,341],[552,338],[552,337],
+  [557,337],[558,337],[565,335],[565,335],[570,334],[571,334],[574,334],[582,332],[585,332],[592,329],
+  [592,329],[595,327],[599,327],[602,327],[605,326],[611,324],[612,324],[613,323],[618,315],[623,315],
+  [626,314],[628,314],[629,314],[632,313],[635,312],[638,310],[638,310],[641,307],[643,307],[648,305],
+  [651,303],[654,302],[659,301],[662,300],[664,299],[667,297],[669,297],[671,297],[675,294],[677,294],
+  [682,292],[684,291],[685,291],[689,291],[696,289],[696,289],[703,288],[702,288],[707,288],[709,288],
+  [711,288],[712,288],[714,288],[716,288],[721,289],[723,289],[726,290],[727,290],[732,291],[734,292],
+  [734,292],[735,294],[738,295],[742,298],[745,300],[750,304],[751,304],[753,306],[754,307],[757,311],
+  [757,311],[757,311],[761,315],[763,315],[766,317],[767,318],[772,321],[777,324],[780,327],[780,327],
+  [782,327],[786,327],[788,327],[793,332],[795,333],[796,333],[798,333],[800,333],[804,334],[806,335],
+  [810,337],[812,337],[817,338],[822,341],[825,341],[829,343],[831,345],[832,349],[834,351],[834,352],
+  [834,356],[835,358],[835,363],[836,365],[836,369],[836,371],[836,374],[836,376],[835,381],[834,381],
+  [834,384],[834,386],[834,387],[834,391],[833,394],[833,397],[832,400],[832,403],[832,407],[831,411],
+  [829,415],[829,416],[828,421],[828,421],[825,424],[822,426],[818,429],[818,432],[815,434],[812,434],
+  [810,434],[807,435],[804,435],[801,435],[794,437],[788,437],[785,440],[779,441],[775,442],[774,442],
+  [771,442],[764,442],[764,441],[758,442],[756,443],[754,443],[750,444],[745,444],[742,444],[738,444],
+  [735,445],[732,446],[728,448],[724,449],[724,451],[722,451],[720,451],[715,451],[713,451],[710,454],
+  [708,455],[702,456],[698,457],[695,457],[689,457],[688,458],[685,458],[678,459],[674,459],[670,461],
+  [667,462],[664,464],[662,464],[661,466],[654,467],[654,467],[651,469],[648,472],[645,472],[642,474],
+  [639,477],[637,477],[635,478],[632,480],[631,480],[629,481],[626,481],[622,485],[618,486],[616,487],
+  [615,488],[613,488],[611,491],[609,492],[605,494],[602,494],[599,497],[596,498],[592,498],[588,499],
+  [586,499],[583,501],[581,501],[578,502],[575,502],[572,502],[568,502],[565,502],[562,502],[560,502],
+  [559,502],[557,502],[555,502],[549,501],[546,500],[545,500],[538,499],[537,499],[534,497],[532,496],
+  [529,495],[529,495],[527,493],[522,491],[518,491],[517,489],[513,488],[508,487],[503,485],[502,484],
+  [498,482],[495,480],[492,477],[491,475],[488,474],[484,467],[483,464],[481,461],[478,458],[478,456],
+  [478,455]
+];
+
+const occipital = [
+  [830,342],[833,341],[836,339],[840,337],[844,334],[845,334],[846,333],[846,331],[847,330],[852,328],
+  [852,327],[852,326],[853,324],[855,324],[855,323],[856,319],[858,317],[860,314],[861,312],[862,311],
+  [863,310],[863,308],[864,307],[864,307],[866,304],[868,303],[868,302],[868,301],[869,299],[871,296],
+  [871,294],[872,294],[872,291],[873,291],[874,289],[876,287],[877,286],[878,284],[878,283],[878,281],
+  [880,280],[882,276],[883,274],[883,273],[884,270],[885,267],[888,264],[889,263],[891,260],[892,257],
+  [896,252],[898,251],[901,248],[903,247],[906,246],[908,245],[909,245],[910,245],[912,245],[914,245],
+  [915,244],[917,244],[921,247],[922,248],[925,249],[927,250],[927,251],[930,255],[932,258],[932,260],
+  [934,264],[936,267],[936,269],[937,271],[938,273],[938,276],[938,280],[938,284],[941,286],[942,287],
+  [944,291],[945,291],[948,295],[948,295],[949,296],[950,298],[952,301],[952,302],[953,306],[955,311],
+  [955,311],[957,317],[957,318],[957,319],[958,321],[958,324],[958,325],[959,328],[960,331],[961,334],
+  [962,338],[962,339],[962,341],[963,343],[963,344],[964,349],[964,352],[964,356],[964,360],[964,361],
+  [965,362],[965,365],[965,367],[965,367],[965,371],[965,373],[965,377],[965,381],[965,384],[965,387],
+  [965,387],[966,389],[965,393],[965,397],[963,398],[962,401],[962,406],[962,409],[962,410],[959,414],
+  [957,418],[954,421],[953,424],[952,426],[949,427],[948,432],[948,433],[944,441],[943,441],[947,436],
+  [947,437],[946,440],[945,441],[942,443],[941,446],[940,447],[938,448],[937,451],[935,451],[930,454],
+  [927,454],[924,457],[920,457],[917,457],[915,458],[913,458],[908,457],[904,457],[899,456],[895,455],
+  [889,454],[884,454],[882,453],[878,453],[875,452],[874,451],[871,451],[865,450],[861,448],[858,447],
+  [854,447],[850,447],[845,445],[843,445],[835,444],[831,443],[828,441],[825,441],[822,440],[818,439],
+  [817,439],[817,437],[818,437],[819,434],[820,431],[821,431],[823,428],[824,426],[825,424],[826,423],
+  [828,420],[828,417],[832,413],[832,411],[833,408],[833,405],[833,402],[833,400],[834,397],[834,397],
+  [834,394],[835,393],[835,391],[835,387],[835,383],[835,381],[835,377],[835,375],[835,373],[836,371],
+  [836,367],[835,365],[835,361],[835,359],[835,351],[833,349],[832,346],[831,344],[830,344]
+];
+
+const cerebellum = [
+  [768,611],[767,611],[765,611],[765,614],[765,614],[762,615],[759,616],[758,616],[755,617],[752,618],
+  [748,616],[742,617],[737,616],[737,616],[733,612],[728,607],[728,605],[726,600],[724,597],[724,597],
+  [722,595],[722,592],[720,591],[719,589],[717,588],[717,586],[717,584],[716,584],[714,583],[714,581],
+  [712,578],[712,576],[709,574],[708,573],[705,572],[705,572],[705,570],[701,567],[700,567],[700,565],
+  [697,562],[695,560],[694,559],[692,557],[690,556],[690,551],[688,551],[688,549],[687,548],[686,546],
+  [685,541],[685,541],[685,538],[683,535],[679,533],[679,530],[677,529],[674,527],[672,526],[668,524],
+  [668,524],[665,522],[662,520],[659,519],[655,518],[654,516],[652,515],[652,515],[649,514],[647,511],
+  [647,508],[644,505],[640,501],[638,498],[638,497],[634,494],[633,491],[633,489],[633,487],[631,484],
+  [633,483],[641,478],[643,477],[647,475],[650,474],[655,471],[658,470],[660,468],[665,466],[668,464],
+  [669,464],[673,464],[678,463],[682,462],[685,462],[690,460],[691,460],[697,460],[701,460],[704,460],
+  [709,457],[715,457],[719,457],[723,452],[725,451],[727,451],[729,448],[732,447],[736,446],[742,446],
+  [747,444],[752,444],[757,446],[759,446],[762,446],[768,444],[773,444],[775,444],[779,444],[784,444],
+  [789,443],[794,443],[798,441],[803,441],[805,440],[811,438],[813,438],[815,438],[819,439],[822,441],
+  [824,441],[828,443],[830,443],[833,443],[838,443],[842,443],[844,444],[848,444],[848,444],[852,446],
+  [857,446],[860,447],[863,447],[867,447],[871,447],[873,449],[878,450],[884,451],[889,452],[892,454],
+  [895,454],[899,457],[902,458],[905,462],[905,466],[908,468],[908,471],[908,475],[908,477],[908,480],
+  [908,481],[908,484],[908,489],[908,490],[907,492],[905,495],[903,497],[903,497],[902,501],[900,501],
+  [900,503],[897,507],[896,508],[896,509],[892,511],[892,511],[892,516],[891,521],[891,521],[888,525],
+  [888,527],[883,531],[881,534],[878,537],[877,540],[875,541],[875,541],[871,543],[869,544],[862,548],
+  [865,548],[862,552],[860,551],[860,551],[855,554],[853,555],[852,557],[848,557],[845,560],[841,561],
+  [835,563],[828,562],[827,561],[824,561],[821,561],[815,561],[810,560],[806,560],[805,562],[802,563],
+  [800,563],[795,564],[794,564],[791,565],[786,566],[783,568],[778,568],[769,568],[765,568],[762,568],
+  [756,567],[758,573],[759,574],[760,577],[762,581],[762,584],[763,586],[765,589],[766,590],[768,595],
+  [768,598],[770,601],[770,605],[770,606],[769,608],[768,609]
+];
+
+function speak(text) {
+  try {
+    window.speechSynthesis.cancel();
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = "ko-KR";
+    window.speechSynthesis.speak(msg);
+  } catch (e) {}
+}
+
+function showMessage(text, ms = 1400) {
+  messageBox.textContent = text;
+  if (messageTimer) clearTimeout(messageTimer);
+  if (ms > 0) {
+    messageTimer = setTimeout(() => {
+      if (mode === "map") messageBox.textContent = "하고 싶은 게임을 눌러보세요";
+      else updateGuideText();
+    }, ms);
+  }
+}
+
+function clearGameTimers() {
+  if (gameTimer) {
+    clearTimeout(gameTimer);
+    gameTimer = null;
+  }
+  if (gameInterval) {
+    clearInterval(gameInterval);
+    gameInterval = null;
+  }
+  if (messageTimer) {
+    clearTimeout(messageTimer);
+    messageTimer = null;
+  }
+}
+
+function resizeCanvasView() {
+  canvas.width = BASE_W;
+  canvas.height = BASE_H;
+  if (img.complete) {
+    imgW = img.width * scale;
+    imgH = img.height * scale;
+    imgX = (canvas.width - imgW) / 2;
+    imgY = (canvas.height - imgH) / 2;
+    if (mode === "map") drawMap();
+    else redrawCurrentGame();
+  }
+}
+
+window.addEventListener("resize", resizeCanvasView);
+
+function goHome() {
+  clearGameTimers();
+  mode = "map";
+  currentRegion = "";
+  hoveredRegion = "";
+  gameData = null;
+  titleText.textContent = "🧠 마우스를 올리거나 터치하면 해당 부위가 보입니다";
+  brainText.textContent = "현재 위치: 없음";
+  coordsText.textContent = "좌표: (0, 0)";
+  homeBtn.style.display = "none";
+  drawMap();
+  showMessage("하고 싶은 게임을 눌러보세요", 0);
+  speak("하고 싶은 게임을 눌러보세요");
+}
+
+homeBtn.addEventListener("click", goHome);
+
+function isPointInPolygon(x, y, polygon) {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const xi = polygon[i][0], yi = polygon[i][1];
+    const xj = polygon[j][0], yj = polygon[j][1];
+    const intersect =
+      ((yi > y) !== (yj > y)) &&
+      (x < ((xj - xi) * (y - yi)) / (yj - yi) + xi);
+    if (intersect) inside = !inside;
+  }
+  return inside;
+}
+
+function getPolygonByRegion(region) {
+  if (region === "전두엽") return frontal;
+  if (region === "두정엽") return parietal;
+  if (region === "측두엽") return temporal;
+  if (region === "후두엽") return occipital;
+  if (region === "소뇌") return cerebellum;
+  return null;
+}
+
+function getRegionName(x, y) {
+  if (x < 0 || x > img.width || y < 0 || y > img.height) return "";
+  if (isPointInPolygon(x, y, frontal)) return "전두엽";
+  if (isPointInPolygon(x, y, parietal)) return "두정엽";
+  if (isPointInPolygon(x, y, temporal)) return "측두엽";
+  if (isPointInPolygon(x, y, occipital)) return "후두엽";
+  if (isPointInPolygon(x, y, cerebellum)) return "소뇌";
+  return "";
+}
+
+function drawPolygonPath(polygon) {
+  if (!polygon || !polygon.length) return;
+  ctx.beginPath();
+  for (let i = 0; i < polygon.length; i++) {
+    const px = imgX + polygon[i][0] * scale;
+    const py = imgY + polygon[i][1] * scale;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+}
+
+function drawMap(mouseX = null, mouseY = null) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, imgX, imgY, imgW, imgH);
+
+  if (hoveredRegion) {
+    const polygon = getPolygonByRegion(hoveredRegion);
+
+    ctx.fillStyle = "rgba(0,0,0,0.35)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    drawPolygonPath(polygon);
+    ctx.clip();
+    ctx.drawImage(img, imgX, imgY, imgW, imgH);
+    ctx.restore();
+
+    ctx.save();
+    drawPolygonPath(polygon);
+    ctx.fillStyle = "rgba(255,255,255,0.12)";
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    drawPolygonPath(polygon);
+    ctx.strokeStyle = "#ffe27a";
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  if (mouseX !== null && mouseY !== null) {
+    ctx.strokeStyle = "#8bd3ff";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(mouseX, mouseY, 10, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+}
+
+function randomItem(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function shuffle(arr) {
+  const copied = [...arr];
+  for (let i = copied.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copied[i], copied[j]] = [copied[j], copied[i]];
+  }
+  return copied;
+}
+
+function registerFailure() {
+  if (!gameData.failCount) gameData.failCount = 0;
+  gameData.failCount++;
+  if (gameData.failCount >= 3) {
+    gameData.failCount = 0;
+    if (typeof gameData.level === "number" && gameData.level > 1) {
+      gameData.level--;
+    }
+    showMessage("조금 더 쉬운 버전으로 바꿔줄게요!", 1700);
+  }
+}
+
+function registerSuccess() {
+  gameData.failCount = 0;
+}
+
+function updateGuideText() {
+  if (currentRegion === "전두엽") messageBox.textContent = "신호등 색에 맞는 행동을 골라요";
+  else if (currentRegion === "두정엽") messageBox.textContent = "같은 모양 두 개를 찾아요";
+  else if (currentRegion === "측두엽") messageBox.textContent = gameData.showing ? "숫자를 보고 기억해요" : "기억한 순서대로 눌러요";
+  else if (currentRegion === "후두엽") messageBox.textContent = "같은 카드 두 장을 찾아요";
+  else if (currentRegion === "소뇌") messageBox.textContent = "두더지를 눌러요. 시간은 계속 세고 있어요";
+}
+
+function redrawCurrentGame() {
+  if (currentRegion === "전두엽") drawFrontalGame();
+  else if (currentRegion === "두정엽") drawParietalGame();
+  else if (currentRegion === "측두엽") {
+    if (gameData.showing) drawTemporalShowing();
+    else drawTemporalGame();
+  }
+  else if (currentRegion === "후두엽") drawOccipitalGame();
+  else if (currentRegion === "소뇌") drawCerebellumGame();
+}
+
+/* 전두엽 */
+function makeFrontalRound() {
+  const signals = [
+    {
+      color: pastelRed,
+      label: "빨간불",
+      answer: "멈춘다",
+      choices: ["멈춘다", "바로 건너간다", "뛰어서 지나간다"]
+    },
+    {
+      color: pastelYellow,
+      label: "노란불",
+      answer: "주의하며 기다린다",
+      choices: ["뛴다", "주의하며 기다린다", "눈 감고 간다"]
+    },
+    {
+      color: pastelGreen,
+      label: "초록불",
+      answer: "좌우를 살피고 건너간다",
+      choices: ["뒤로 간다", "좌우를 살피고 건너간다", "앉아서 기다린다"]
+    }
+  ];
+
+  const selected = randomItem(signals);
+  const mixedChoices = shuffle(selected.choices);
+
+  gameData.round = {
+    signal: selected,
+    choices: mixedChoices.map((text, i) => ({
+      text,
+      correct: text === selected.answer,
+      x: 120 + i * 320,
+      y: 430,
+      w: 260,
+      h: 92
+    }))
+  };
+}
+
+function startFrontalGame() {
+  mode = "game";
+  currentRegion = "전두엽";
+  homeBtn.style.display = "inline-block";
+  titleText.textContent = "🟥 전두엽 게임";
+  brainText.textContent = "현재 위치: 전두엽 게임";
+  gameData = { score: 0, round: null, level: 2, failCount: 0 };
+  makeFrontalRound();
+  updateGuideText();
+  drawFrontalGame();
+  speak("게임을 시작합니다");
+}
+
+function drawFrontalGame() {
+  const round = gameData.round;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  ctx.font = "30px Pretendard, Jua, sans-serif";
+  ctx.fillStyle = "#2f3b48";
+  ctx.fillText("점수: " + gameData.score, 1030, 60);
+  ctx.fillText(`${round.signal.label}일 때 어떻게 해야 할까요?`, canvas.width / 2, 120);
+
+  ctx.fillStyle = "#5c6f82";
+  ctx.fillRect(canvas.width / 2 - 55, 180, 110, 210);
+
+  const lights = [
+    { y: 230, color: pastelRed },
+    { y: 285, color: pastelYellow },
+    { y: 340, color: pastelGreen }
+  ];
+
+  for (const light of lights) {
+    ctx.fillStyle = light.color === round.signal.color ? light.color : "#d7dde5";
+    ctx.beginPath();
+    ctx.arc(canvas.width / 2, light.y, 30, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.font = "28px Pretendard, Jua, sans-serif";
+  for (const c of round.choices) {
+    ctx.fillStyle = pastelCard;
+    ctx.strokeStyle = "#c8dcec";
+    ctx.lineWidth = 3;
+    ctx.fillRect(c.x, c.y, c.w, c.h);
+    ctx.strokeRect(c.x, c.y, c.w, c.h);
+    ctx.fillStyle = "#2b3a46";
+    ctx.fillText(c.text, c.x + c.w / 2, c.y + c.h / 2);
+  }
+}
+
+/* 두정엽 */
+function makeParietalRound() {
+  const allTypes = ["circle", "square", "triangle", "diamond", "star"];
+  const useCount = gameData.level <= 1 ? 3 : gameData.level === 2 ? 4 : 5;
+  const pool = allTypes.slice(0, useCount);
+
+  const correctType = randomItem(pool);
+  const wrongs = shuffle(pool.filter(t => t !== correctType)).slice(0, 2);
+
+  const positions = shuffle([
+    { x: 190, y: 240 },
+    { x: 410, y: 240 },
+    { x: 630, y: 240 },
+    { x: 850, y: 240 }
+  ]);
+
+  const shapes = [
+    { type: correctType, x: positions[0].x, y: positions[0].y, size: 92 },
+    { type: correctType, x: positions[1].x, y: positions[1].y, size: 92 },
+    { type: wrongs[0], x: positions[2].x, y: positions[2].y, size: 92 },
+    { type: wrongs[1] || "circle", x: positions[3].x, y: positions[3].y, size: 92 }
+  ];
+
+  gameData.shapes = shuffle(shapes);
+  gameData.selected = [];
+}
+
+function startParietalGame() {
+  mode = "game";
+  currentRegion = "두정엽";
+  homeBtn.style.display = "inline-block";
+  titleText.textContent = "🟨 두정엽 게임";
+  brainText.textContent = "현재 위치: 두정엽 게임";
+  gameData = {
+    score: 0,
+    selected: [],
+    shapes: [],
+    level: 3,
+    failCount: 0
+  };
+  makeParietalRound();
+  updateGuideText();
+  drawParietalGame();
+  speak("게임을 시작합니다");
+}
+
+function drawOneShape(s, highlight = false) {
+  ctx.lineWidth = 5;
+  ctx.strokeStyle = highlight ? "#ffb86b" : "#89a3bb";
+  ctx.fillStyle = "#eef7ff";
+
+  if (s.type === "circle") {
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.size / 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  } else if (s.type === "square") {
+    ctx.fillRect(s.x, s.y, s.size, s.size);
+    ctx.strokeRect(s.x, s.y, s.size, s.size);
+  } else if (s.type === "triangle") {
+    ctx.beginPath();
+    ctx.moveTo(s.x + s.size / 2, s.y);
+    ctx.lineTo(s.x, s.y + s.size);
+    ctx.lineTo(s.x + s.size, s.y + s.size);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  } else if (s.type === "diamond") {
+    ctx.beginPath();
+    ctx.moveTo(s.x + s.size / 2, s.y);
+    ctx.lineTo(s.x + s.size, s.y + s.size / 2);
+    ctx.lineTo(s.x + s.size / 2, s.y + s.size);
+    ctx.lineTo(s.x, s.y + s.size / 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  } else if (s.type === "star") {
+    const cx = s.x + s.size / 2;
+    const cy = s.y + s.size / 2;
+    const outer = s.size / 2;
+    const inner = s.size / 4.5;
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) {
+      const angle = -Math.PI / 2 + i * Math.PI / 5;
+      const r = i % 2 === 0 ? outer : inner;
+      const px = cx + Math.cos(angle) * r;
+      const py = cy + Math.sin(angle) * r;
+      if (i === 0) ctx.moveTo(px, py);
+      else ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
+}
+
+function drawParietalGame() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "30px Pretendard, Jua, sans-serif";
+  ctx.fillStyle = "#2f3b48";
+  ctx.fillText("같은 모양 2개를 찾아보세요", canvas.width / 2, 100);
+  ctx.fillText("점수: " + gameData.score, 1030, 60);
+
+  for (let i = 0; i < gameData.shapes.length; i++) {
+    drawOneShape(gameData.shapes[i], gameData.selected.includes(i));
+  }
+}
+
+function isShapeHit(x, y, s) {
+  if (s.type === "circle") {
+    const r = s.size / 2;
+    const dx = x - s.x;
+    const dy = y - s.y;
+    return dx * dx + dy * dy <= r * r;
+  }
+  return x >= s.x && x <= s.x + s.size && y >= s.y && y <= s.y + s.size;
+}
+
+/* 측두엽 */
+function makeTemporalRound() {
+  let count = gameData.level <= 1 ? 2 : 3;
+  const nums = shuffle([1, 2, 3]).slice(0, count);
+  gameData.sequence = nums;
+  gameData.userInput = [];
+  gameData.showing = true;
+}
+
+function startTemporalGame() {
+  mode = "game";
+  currentRegion = "측두엽";
+  homeBtn.style.display = "inline-block";
+  titleText.textContent = "🟪 측두엽 게임";
+  brainText.textContent = "현재 위치: 측두엽 게임";
+  gameData = {
+    score: 0,
+    level: 2,
+    failCount: 0,
+    sequence: [],
+    userInput: [],
+    showing: true,
+    buttons: [
+      { num: 1, x: 220, y: 390, w: 180, h: 120 },
+      { num: 2, x: 510, y: 390, w: 180, h: 120 },
+      { num: 3, x: 800, y: 390, w: 180, h: 120 }
+    ]
+  };
+  makeTemporalRound();
+  updateGuideText();
+  showTemporalSequence(0);
+  speak("게임을 시작합니다");
+}
+
+function drawTemporalShowing(currentNum = "") {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = "#2f3b48";
+  ctx.font = "30px Pretendard, Jua, sans-serif";
+  ctx.fillText("점수: " + gameData.score, 1030, 60);
+  ctx.fillText("숫자를 보고 기억해요", canvas.width / 2, 110);
+
+  if (currentNum !== "") {
+    ctx.font = "140px Pretendard, Jua, sans-serif";
+    ctx.fillStyle = pastelPurple;
+    ctx.fillText(String(currentNum), canvas.width / 2, 250);
+  }
+}
+
+function showTemporalSequence(index) {
+  if (index < gameData.sequence.length) {
+    drawTemporalShowing(gameData.sequence[index]);
+    gameTimer = setTimeout(() => {
+      showTemporalSequence(index + 1);
+    }, 1500);
+  } else {
+    gameData.showing = false;
+    updateGuideText();
+    drawTemporalGame();
+  }
+}
+
+function drawTemporalGame() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+
+  ctx.font = "30px Pretendard, Jua, sans-serif";
+  ctx.fillStyle = "#2f3b48";
+  ctx.fillText("기억한 순서대로 눌러보세요", canvas.width / 2, 100);
+  ctx.fillText("점수: " + gameData.score, 1030, 60);
+
+  ctx.font = "32px Pretendard, Jua, sans-serif";
+  ctx.fillStyle = "#5d6f80";
+  const pressed = gameData.userInput.length ? gameData.userInput.join(" → ") : "아직 누르지 않았어요";
+  ctx.fillText("내가 누른 숫자: " + pressed, canvas.width / 2, 185);
+
+  for (const b of gameData.buttons) {
+    ctx.fillStyle = pastelCard;
+    ctx.strokeStyle = "#c8dcec";
+    ctx.lineWidth = 3;
+    ctx.fillRect(b.x, b.y, b.w, b.h);
+    ctx.strokeRect(b.x, b.y, b.w, b.h);
+    ctx.fillStyle = "#31404d";
+    ctx.font = "72px Pretendard, Jua, sans-serif";
+    ctx.fillText(String(b.num), b.x + b.w / 2, b.y + b.h / 2);
+  }
+}
+
+/* 후두엽 */
+function makeOccipitalRound() {
+  const values = gameData.level <= 1
+    ? ["●", "▲", "●", "▲"]
+    : ["●", "▲", "■", "★", "●", "▲", "■", "★"];
+
+  const mixed = shuffle(values);
+  gameData.cards = [];
+  gameData.first = null;
+  gameData.second = null;
+  gameData.lock = false;
+  gameData.matched = 0;
+
+  const cols = values.length === 4 ? 2 : 4;
+  const rows = values.length === 4 ? 2 : 2;
+  const w = 120;
+  const h = 140;
+  const gap = 28;
+  const totalW = cols * w + (cols - 1) * gap;
+  const startX = (canvas.width - totalW) / 2;
+  const startY = 180;
+
+  for (let i = 0; i < mixed.length; i++) {
+    const row = Math.floor(i / cols);
+    const col = i % cols;
+    gameData.cards.push({
+      x: startX + col * (w + gap),
+      y: startY + row * (h + gap),
+      w,
+      h,
+      value: mixed[i],
+      open: false,
+      matched: false
+    });
+  }
+}
+
+function startOccipitalGame() {
+  mode = "game";
+  currentRegion = "후두엽";
+  homeBtn.style.display = "inline-block";
+  titleText.textContent = "🟦 후두엽 게임";
+  brainText.textContent = "현재 위치: 후두엽 게임";
+  gameData = {
+    score: 0,
+    level: 2,
+    failCount: 0,
+    cards: [],
+    first: null,
+    second: null,
+    lock: false,
+    matched: 0
+  };
+  makeOccipitalRound();
+  updateGuideText();
+  drawOccipitalGame();
+  speak("게임을 시작합니다");
+}
+
+function drawOccipitalGame() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "30px Pretendard, Jua, sans-serif";
+  ctx.fillStyle = "#2f3b48";
+  ctx.fillText("같은 카드 두 장을 찾아보세요", canvas.width / 2, 100);
+  ctx.fillText("점수: " + gameData.score, 1030, 60);
+
+  for (const c of gameData.cards) {
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#c8dcec";
+    if (c.open || c.matched) {
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(c.x, c.y, c.w, c.h);
+      ctx.strokeRect(c.x, c.y, c.w, c.h);
+      ctx.fillStyle = "#31404d";
+      ctx.font = "60px Pretendard, Jua, sans-serif";
+      ctx.fillText(c.value, c.x + c.w / 2, c.y + c.h / 2);
+    } else {
+      ctx.fillStyle = pastelBlue;
+      ctx.fillRect(c.x, c.y, c.w, c.h);
+      ctx.strokeRect(c.x, c.y, c.w, c.h);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "60px Pretendard, Jua, sans-serif";
+      ctx.fillText("?", c.x + c.w / 2, c.y + c.h / 2);
+    }
+  }
+}
+
+/* 소뇌 */
+function startCerebellumGame(keepScore = 0, keepLevel = 2, keepFail = 0) {
+  clearGameTimers();
+  mode = "game";
+  currentRegion = "소뇌";
+  homeBtn.style.display = "inline-block";
+  titleText.textContent = "🟩 소뇌 게임";
+  brainText.textContent = "현재 위치: 소뇌 게임";
+
+  const holes = [];
+  const startX = 330;
+  const startY = 170;
+  const gapX = 190;
+  const gapY = 145;
+
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 3; col++) {
+      holes.push({
+        x: startX + col * gapX,
+        y: startY + row * gapY,
+        r: 60
+      });
+    }
+  }
+
+  gameData = {
+    score: keepScore,
+    level: keepLevel,
+    failCount: keepFail,
+    holes,
+    activeIndex: Math.floor(Math.random() * holes.length),
+    hitCount: 0,
+    targetHits: keepLevel <= 1 ? 6 : keepLevel === 2 ? 8 : 10,
+    startTime: Date.now(),
+    elapsed: 0,
+    moleUp: true,
+    isHitEffect: false
+  };
+
+  updateGuideText();
+
+  gameInterval = setInterval(() => {
+    if (!gameData || currentRegion !== "소뇌") return;
+    gameData.elapsed = ((Date.now() - gameData.startTime) / 1000).toFixed(1);
+    drawCerebellumGame();
+  }, 100);
+
+  drawCerebellumGame();
+  speak("게임을 시작합니다");
+}
+
+function moveNextMole() {
+  if (!gameData || currentRegion !== "소뇌") return;
+  let next = Math.floor(Math.random() * gameData.holes.length);
+  while (next === gameData.activeIndex && gameData.holes.length > 1) {
+    next = Math.floor(Math.random() * gameData.holes.length);
+  }
+  gameData.activeIndex = next;
+  gameData.moleUp = true;
+  gameData.isHitEffect = false;
+  drawCerebellumGame();
+}
+
+function drawCerebellumGame() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "30px Pretendard, Jua, sans-serif";
+  ctx.fillStyle = "#2f3b48";
+  ctx.fillText("잡은 수: " + gameData.hitCount + " / " + gameData.targetHits, 260, 70);
+  ctx.fillText("시간: " + gameData.elapsed + "초", 870, 70);
+  ctx.fillText("점수: " + gameData.score, 1030, 110);
+
+  for (let i = 0; i < gameData.holes.length; i++) {
+    const h = gameData.holes[i];
+
+    ctx.fillStyle = "#c6a98b";
+    ctx.beginPath();
+    ctx.ellipse(h.x, h.y + 24, h.r, 34, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (i === gameData.activeIndex && gameData.moleUp) {
+      if (gameData.isHitEffect) {
+        ctx.fillStyle = pastelOrange;
+        ctx.beginPath();
+        ctx.arc(h.x, h.y - 15, 42, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#31404d";
+        ctx.font = "24px Pretendard, Jua, sans-serif";
+        ctx.fillText("성공!", h.x, h.y - 18);
+      } else {
+        ctx.fillStyle = "#b78f67";
+        ctx.beginPath();
+        ctx.arc(h.x, h.y - 15, 42, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.beginPath();
+        ctx.arc(h.x - 12, h.y - 22, 5, 0, Math.PI * 2);
+        ctx.arc(h.x + 12, h.y - 22, 5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = "#31404d";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(h.x, h.y - 8, 12, 0, Math.PI);
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function startRegionGame(region) {
+  hoveredRegion = "";
+  clearGameTimers();
+  if (region === "전두엽") startFrontalGame();
+  else if (region === "두정엽") startParietalGame();
+  else if (region === "측두엽") startTemporalGame();
+  else if (region === "후두엽") startOccipitalGame();
+  else if (region === "소뇌") startCerebellumGame();
+}
+
+function getCanvasPoint(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  return {
+    x: (clientX - rect.left) * scaleX,
+    y: (clientY - rect.top) * scaleY
+  };
+}
+
+function handleMapMove(px, py) {
+  if (mode !== "map") return;
+
+  const realX = Math.round((px - imgX) / scale);
+  const realY = Math.round((py - imgY) / scale);
+
+  coordsText.textContent = `좌표: (${realX}, ${realY})`;
+  const region = getRegionName(realX, realY);
+  hoveredRegion = region;
+  brainText.textContent = region ? "현재 위치: " + region : "현재 위치: 없음";
+  drawMap(px, py);
+}
+
+function handleCanvasClick(px, py) {
+  if (mode === "map") {
+    const realX = Math.round((px - imgX) / scale);
+    const realY = Math.round((py - imgY) / scale);
+    const region = getRegionName(realX, realY);
+    if (region) startRegionGame(region);
+    return;
+  }
+
+  if (mode !== "game") return;
+
+  if (currentRegion === "전두엽") {
+    for (const c of gameData.round.choices) {
+      if (px >= c.x && px <= c.x + c.w && py >= c.y && py <= c.y + c.h) {
+        if (c.correct) {
+          gameData.score++;
+          registerSuccess();
+          showMessage("정답이야! 잘했어");
+          speak("잘했어요");
+        } else {
+          registerFailure();
+          showMessage("한번 더 해볼까요?");
+          speak("괜찮아요, 다시 해봐요");
+        }
+        makeFrontalRound();
+        drawFrontalGame();
+        return;
+      }
+    }
+  }
+
+  if (currentRegion === "두정엽") {
+    for (let i = 0; i < gameData.shapes.length; i++) {
+      const s = gameData.shapes[i];
+      if (!isShapeHit(px, py, s)) continue;
+
+      if (!gameData.selected.includes(i)) {
+        gameData.selected.push(i);
+      }
+
+      drawParietalGame();
+
+      if (gameData.selected.length === 2) {
+        const a = gameData.shapes[gameData.selected[0]];
+        const b = gameData.shapes[gameData.selected[1]];
+        setTimeout(() => {
+          if (a.type === b.type) {
+            gameData.score++;
+            registerSuccess();
+            showMessage("정답이야! 잘했어");
+            speak("잘했어요");
+          } else {
+            registerFailure();
+            showMessage("한번 더 해볼까요?");
+            speak("괜찮아요, 다시 해봐요");
+          }
+          makeParietalRound();
+          drawParietalGame();
+        }, 300);
+      }
+      return;
+    }
+  }
+
+  if (currentRegion === "측두엽") {
+    if (gameData.showing) return;
+
+    for (const b of gameData.buttons) {
+      if (px >= b.x && px <= b.x + b.w && py >= b.y && py <= b.y + b.h) {
+        gameData.userInput.push(b.num);
+        drawTemporalGame();
+
+        const idx = gameData.userInput.length - 1;
+        if (gameData.userInput[idx] !== gameData.sequence[idx]) {
+          registerFailure();
+          showMessage("괜찮아요, 다시 해봐요 :)", 1600);
+          speak("괜찮아요, 다시 해봐요");
+          makeTemporalRound();
+          showTemporalSequence(0);
+          return;
+        }
+
+        if (gameData.userInput.length === gameData.sequence.length) {
+          gameData.score++;
+          registerSuccess();
+          showMessage("정답이야! 잘했어", 1400);
+          speak("잘했어요");
+          makeTemporalRound();
+          showTemporalSequence(0);
+        }
+        return;
+      }
+    }
+  }
+
+  if (currentRegion === "후두엽") {
+    if (gameData.lock) return;
+
+    for (const c of gameData.cards) {
+      if (px >= c.x && px <= c.x + c.w && py >= c.y && py <= c.y + c.h) {
+        if (c.open || c.matched) return;
+
+        c.open = true;
+
+        if (!gameData.first) {
+          gameData.first = c;
+        } else if (!gameData.second && c !== gameData.first) {
+          gameData.second = c;
+          gameData.lock = true;
+
+          if (gameData.first.value === gameData.second.value) {
+            gameData.first.matched = true;
+            gameData.second.matched = true;
+            gameData.first = null;
+            gameData.second = null;
+            gameData.lock = false;
+            gameData.matched++;
+            drawOccipitalGame();
+
+            const totalPairs = gameData.cards.length / 2;
+            if (gameData.matched >= totalPairs) {
+              gameData.score++;
+              registerSuccess();
+              showMessage("정답이야! 잘했어");
+              speak("잘했어요");
+              setTimeout(() => {
+                makeOccipitalRound();
+                drawOccipitalGame();
+              }, 500);
+            }
+          } else {
+            registerFailure();
+            speak("괜찮아요, 다시 해봐요");
+            drawOccipitalGame();
+            setTimeout(() => {
+              gameData.first.open = false;
+              gameData.second.open = false;
+              gameData.first = null;
+              gameData.second = null;
+              gameData.lock = false;
+              showMessage("한번 더 해볼까요?");
+              drawOccipitalGame();
+            }, 700);
+          }
+        }
+        drawOccipitalGame();
+        return;
+      }
+    }
+  }
+
+  if (currentRegion === "소뇌") {
+    const activeHole = gameData.holes[gameData.activeIndex];
+    const dx = px - activeHole.x;
+    const dy = py - (activeHole.y - 15);
+
+    if (gameData.moleUp && dx * dx + dy * dy <= 60 * 60) {
+      gameData.hitCount++;
+      gameData.elapsed = ((Date.now() - gameData.startTime) / 1000).toFixed(1);
+      gameData.isHitEffect = true;
+      drawCerebellumGame();
+
+      if (gameData.hitCount >= gameData.targetHits) {
+        clearInterval(gameInterval);
+        gameInterval = null;
+        gameData.score++;
+        registerSuccess();
+        showMessage("잘했어요! 다음 판 시작합니다", 1500);
+        speak("훌륭해요! 다음 게임으로 가볼까요?");
+        setTimeout(() => {
+          startCerebellumGame(gameData.score, gameData.level, gameData.failCount);
+        }, 900);
+      } else {
+        setTimeout(() => {
+          moveNextMole();
+        }, 350);
+      }
+    }
+  }
+}
+
+canvas.addEventListener("mousemove", (e) => {
+  handleMapMove(e.offsetX, e.offsetY);
+});
+
+canvas.addEventListener("mouseleave", () => {
+  if (mode !== "map") return;
+  hoveredRegion = "";
+  brainText.textContent = "현재 위치: 없음";
+  coordsText.textContent = "좌표: (0, 0)";
+  drawMap();
+});
+
+canvas.addEventListener("click", (e) => {
+  handleCanvasClick(e.offsetX, e.offsetY);
+});
+
+canvas.addEventListener("touchmove", (e) => {
+  e.preventDefault();
+  const t = e.touches[0];
+  const p = getCanvasPoint(t.clientX, t.clientY);
+  handleMapMove(p.x, p.y);
+}, { passive: false });
+
+canvas.addEventListener("touchend", (e) => {
+  e.preventDefault();
+  const t = e.changedTouches[0];
+  const p = getCanvasPoint(t.clientX, t.clientY);
+  handleCanvasClick(p.x, p.y);
+}, { passive: false });
+
+img.onload = () => {
+  resizeCanvasView();
+  drawMap();
+  showMessage("하고 싶은 게임을 눌러보세요", 0);
+  speak("하고 싶은 게임을 눌러보세요");
+};
+</script>
+</body>
+</html>
