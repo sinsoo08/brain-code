@@ -14,7 +14,7 @@ export default function OAuth2RedirectPage() {
 
     if (token) {
       localStorage.setItem('token', token)
-      navigate('/profile', { replace: true })
+      navigate('/dashboard', { replace: true })
     } else {
       navigate('/login', { replace: true })
     }

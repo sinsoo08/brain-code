@@ -16,6 +16,10 @@ spring:
       hibernate:
         format_sql: true
     database-platform: org.hibernate.dialect.H2Dialect
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
   security:
     oauth2:
       client:
@@ -30,8 +34,8 @@ spring:
               - profile_nickname
             client-name: Kakao
           google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
+            client-id: ${GOOGLE_CLIENT_ID:disabled}
+            client-secret: ${GOOGLE_CLIENT_SECRET:disabled}
             scope:
               - email
               - profile
@@ -48,7 +52,8 @@ server:
 app:
   jwt:
     secret: YnJhaW5jb2Rlci1zZWNyZXQta2V5LWZvci1qd3QtdG9rZW4tMjAyNC0tLS0tLS0t
-    expiration: 86400000
+    access-expiration: 1800000       # 30분
+    refresh-expiration: 1209600000   # 14일
   oauth2:
     redirect-uri: http://localhost:5173/oauth2/redirect
 

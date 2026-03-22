@@ -40,7 +40,7 @@ export default function LoginPage() {
       localStorage.setItem('token', res.data.token)
       localStorage.setItem('userEmail', res.data.email)
       showAlert('로그인이 되었습니다!')
-      setTimeout(() => navigate('/profile'), 1000)
+      setTimeout(() => navigate('/dashboard'), 1000)
     } catch (err) {
       const msg = err.response?.data?.message || '로그인에 실패했습니다.'
       showAlert(msg, '#dc3545')

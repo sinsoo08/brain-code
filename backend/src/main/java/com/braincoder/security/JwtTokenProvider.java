@@ -15,41 +15,75 @@ public class JwtTokenProvider {
     @Value("${app.jwt.secret}")
     private String jwtSecret;
 
-    @Value("${app.jwt.expiration}")
-    private long jwtExpiration;
+    @Value("${app.jwt.access-expiration}")
+    private long accessExpiration;
 
-    public String generateToken(Long userId, String email) {
+    @Value("${app.jwt.refresh-expiration}")
+    private long refreshExpiration;
+
+    // ─── Token 생성 ───────────────────────────────────────────────
+
+    public String generateAccessToken(Long userId, String email) {
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + jwtExpiration);
-
         return Jwts.builder()
                 .setSubject(userId.toString())
                 .claim("email", email)
+                .claim("type", "access")
                 .setIssuedAt(now)
-                .setExpiration(expiryDate)
+                .setExpiration(new Date(now.getTime() + accessExpiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
+    public String generateRefreshToken(Long userId) {
+        Date now = new Date();
+        return Jwts.builder()
+                .setSubject(userId.toString())
+                .claim("type", "refresh")
+                .setIssuedAt(now)
+                .setExpiration(new Date(now.getTime() + refreshExpiration))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    // ─── Token 파싱 ───────────────────────────────────────────────
+
     public Long getUserIdFromToken(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-        return Long.parseLong(claims.getSubject());
+        return Long.parseLong(parseClaims(token).getSubject());
+    }
+
+    /** 토큰의 남은 유효시간 (ms). 이미 만료된 경우 0 반환 */
+    public long getRemainingMs(String token) {
+        try {
+            long expiry = parseClaims(token).getExpiration().getTime();
+            long remaining = expiry - System.currentTimeMillis();
+            return Math.max(remaining, 0);
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(getSigningKey())
-                    .build()
-                    .parseClaimsJws(token);
+            parseClaims(token);
             return true;
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public long getRefreshExpiration() {
+        return refreshExpiration;
+    }
+
+    // ─── 내부 유틸 ────────────────────────────────────────────────
+
+    private Claims parseClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
     private Key getSigningKey() {

@@ -6,7 +6,7 @@ import com.braincoder.oauth2.OAuth2UserInfo;
 import com.braincoder.oauth2.OAuth2UserInfoFactory;
 import com.braincoder.repository.UserRepository;
 import com.braincoder.security.UserPrincipal;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -14,13 +14,11 @@ import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 @Service
+@RequiredArgsConstructor
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -38,32 +36,12 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
                     registrationId, oAuth2User.getAttributes());
             AuthProvider provider = AuthProvider.valueOf(registrationId.toUpperCase());
 
-            Optional<User> userOptional = userRepository.findByProviderAndProviderId(
-                    provider, userInfo.getId());
-
-            User user;
-            if (userOptional.isPresent()) {
-                user = userOptional.get();
-                if (userInfo.getName() != null) {
-                    user.setNickname(userInfo.getName());
-                    user = userRepository.save(user);
-                }
-            } else {
-                String email = userInfo.getEmail();
-                if (email != null) {
-                    Optional<User> existingUser = userRepository.findByEmail(email);
-                    if (existingUser.isPresent()) {
-                        user = existingUser.get();
-                        user.setProvider(provider);
-                        user.setProviderId(userInfo.getId());
-                        user = userRepository.save(user);
-                    } else {
-                        user = createNewUser(provider, userInfo);
-                    }
-                } else {
-                    user = createNewUser(provider, userInfo);
-                }
-            }
+            User user = userRepository.findByProviderAndProviderId(provider, userInfo.getId())
+                    .map(existing -> {
+                        if (userInfo.getName() != null) existing.setNickname(userInfo.getName());
+                        return userRepository.save(existing);
+                    })
+                    .orElseGet(() -> resolveOrCreateUser(provider, userInfo));
 
             return UserPrincipal.create(user, oAuth2User.getAttributes());
 
@@ -75,13 +53,25 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
     }
 
+    private User resolveOrCreateUser(AuthProvider provider, OAuth2UserInfo userInfo) {
+        if (userInfo.getEmail() != null) {
+            return userRepository.findByEmail(userInfo.getEmail())
+                    .map(existing -> {
+                        existing.setProvider(provider);
+                        existing.setProviderId(userInfo.getId());
+                        return userRepository.save(existing);
+                    })
+                    .orElseGet(() -> createNewUser(provider, userInfo));
+        }
+        return createNewUser(provider, userInfo);
+    }
+
     private User createNewUser(AuthProvider provider, OAuth2UserInfo userInfo) {
-        User user = User.builder()
+        return userRepository.save(User.builder()
                 .email(userInfo.getEmail())
                 .nickname(userInfo.getName())
                 .provider(provider)
                 .providerId(userInfo.getId())
-                .build();
-        return userRepository.save(user);
+                .build());
     }
 }
