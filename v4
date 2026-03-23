@@ -1,0 +1,3027 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>뇌 기능 기반 미니게임 웹</title>
+    <style>
+         :root {
+            --bg: #ecf4fd;
+            --panel: #f7fbff;
+            --card: #ffffff;
+            --line: #cfe0f5;
+            --text: #35506b;
+            --sub: #6c86a0;
+            --btn: #d8ebff;
+            --btn-hover: #c8e1fb;
+            --btn-strong: #bfdcff;
+            --good: #dff6e8;
+            --warn: #fff1cf;
+            --soft-blue: #d9ecff;
+            --soft-purple: #eee4ff;
+            --soft-pink: #ffe5ef;
+            --soft-mint: #def7f0;
+            --soft-yellow: #fff5d9;
+            --shadow: 0 8px 24px rgba(79, 117, 157, 0.10);
+            --radius: 20px;
+        }
+        
+        * {
+            box-sizing: border-box
+        }
+        
+        body {
+            margin: 0;
+            font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+        
+        button,
+        input,
+        select {
+            font-family: inherit;
+        }
+        
+        .app {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            background: rgba(236, 244, 253, 0.94);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--line);
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            font-size: 20px;
+        }
+        
+        .brain-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #dbeeff, #f3e8ff);
+            display: grid;
+            place-items: center;
+            box-shadow: var(--shadow);
+            font-size: 22px;
+        }
+        
+        .top-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            border: none;
+            border-radius: 14px;
+            padding: 11px 15px;
+            background: var(--btn);
+            color: var(--text);
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: .18s ease;
+            font-weight: 700;
+        }
+        
+        .btn:hover {
+            background: var(--btn-hover);
+            transform: translateY(-1px);
+        }
+        
+        .btn.strong {
+            background: var(--btn-strong) !important;
+        }
+        
+        .btn.ghost {
+            background: #fff;
+            border: 1px solid var(--line);
+            box-shadow: none;
+        }
+        
+        .screen {
+            width: min(1360px, 96vw);
+            margin: 20px auto 28px;
+            display: none;
+        }
+        
+        .screen.active {
+            display: block;
+        }
+        
+        .welcome {
+            display: grid;
+            grid-template-columns: 1.15fr .85fr;
+            gap: 18px;
+        }
+        
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 22px;
+        }
+        
+        .hero {
+            min-height: 430px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 16px;
+            background: radial-gradient(circle at top left, rgba(255, 255, 255, .95), rgba(255, 255, 255, .55) 40%, rgba(255, 255, 255, .15)), linear-gradient(135deg, #dfeeff 0%, #f7ecff 55%, #e8fff6 100%);
+        }
+        
+        .hero h1 {
+            margin: 0;
+            font-size: 40px;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            margin: 0;
+            color: var(--sub);
+            line-height: 1.7;
+            font-size: 17px;
+        }
+        
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .mini-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+        }
+        
+        .mini-card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 16px;
+        }
+        
+        .mini-card h3 {
+            margin: 0 0 8px;
+            font-size: 17px;
+        }
+        
+        .mini-card p {
+            margin: 0;
+            color: var(--sub);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        
+        .main-layout {
+            display: grid;
+            grid-template-columns: 1.18fr .82fr;
+            gap: 18px;
+            align-items: start;
+        }
+        
+        .brain-panel {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+        
+        .section-title h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+        
+        .section-title p {
+            margin: 0;
+            color: var(--sub);
+            font-size: 14px;
+        }
+        
+        .brain-stage {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 660px;
+            border-radius: 20px;
+            background: radial-gradient(circle at top, rgba(255, 255, 255, .85), rgba(255, 255, 255, .4) 35%, rgba(255, 255, 255, 0) 80%), linear-gradient(180deg, #f8fbff, #edf5fd);
+            overflow: hidden;
+            border: 1px dashed #d3e4f5;
+        }
+        
+        .brain-wrapper {
+            position: relative;
+            width: min(100%, 920px);
+            aspect-ratio: 1100 / 760;
+        }
+        
+        .brain-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            user-select: none;
+            -webkit-user-drag: none;
+            filter: drop-shadow(0 12px 18px rgba(85, 112, 144, 0.14));
+        }
+        
+        .brain-svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .region {
+            cursor: pointer;
+            transition: fill .15s ease, opacity .15s ease, stroke .15s ease;
+            stroke: rgba(89, 120, 154, .38);
+            stroke-width: 2.2;
+            fill: rgba(255, 255, 255, 0.04);
+        }
+        
+        .region:hover {
+            fill: rgba(188, 218, 255, 0.28);
+        }
+        
+        .region.active {
+            fill: rgba(176, 214, 255, 0.46);
+            stroke: rgba(69, 117, 168, .85);
+            stroke-width: 3;
+        }
+        
+        .region.dimmed {
+            opacity: .16;
+        }
+        
+        .label-pill {
+            position: absolute;
+            background: rgba(255, 255, 255, .88);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+            pointer-events: none;
+            color: var(--text);
+            display: none;
+        }
+        
+        .label-pill.show {
+            display: block;
+        }
+        
+        .brain-help {
+            margin-top: 14px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .tag {
+            background: #fff;
+            border: 1px solid var(--line);
+            padding: 8px 12px;
+            border-radius: 999px;
+            color: var(--sub);
+            font-size: 13px;
+            font-weight: 700;
+        }
+        
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 16px;
+        }
+        
+        .stat-card .label {
+            font-size: 13px;
+            color: var(--sub);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 800;
+        }
+        
+        .detail-stats {
+            display: grid;
+            gap: 10px;
+            margin-top: 14px;
+        }
+        
+        .detail-row {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 14px;
+        }
+        
+        .detail-row-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .detail-meta {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            font-size: 13px;
+            color: var(--sub);
+        }
+        
+        .detail-meta div {
+            background: #f7fbff;
+            border-radius: 12px;
+            padding: 10px;
+            border: 1px solid #e3eef8;
+        }
+        
+        .game-panel .game-shell {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 16px;
+            min-height: 280px;
+        }
+        
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        
+        .game-title {
+            font-size: 20px;
+            font-weight: 800;
+        }
+        
+        .subline {
+            color: var(--sub);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .inline-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+        
+        .select,
+        .text-input {
+            border: 1px solid var(--line);
+            background: #fff;
+            border-radius: 12px;
+            padding: 10px 12px;
+            color: var(--text);
+            min-width: 120px;
+        }
+        
+        .center-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            min-height: 180px;
+            text-align: center;
+        }
+        
+        .big-number,
+        .big-word {
+            font-size: 52px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: #476583;
+        }
+        
+        .answer-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .quiz-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 92px);
+            gap: 12px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        
+        .quiz-cell {
+            width: 92px;
+            height: 92px;
+            border: none;
+            border-radius: 18px;
+            background: var(--soft-blue);
+            box-shadow: var(--shadow);
+            font-size: 30px;
+            cursor: pointer;
+            transition: .16s ease;
+        }
+        
+        .quiz-cell:hover {
+            transform: translateY(-1px);
+        }
+        
+        .reaction-box {
+            width: min(100%, 360px);
+            min-height: 180px;
+            display: grid;
+            place-items: center;
+            border-radius: 22px;
+            border: 2px dashed #d5e5f4;
+            background: #f8fbff;
+            margin: 10px auto 0;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        
+        .visual-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 94px);
+            gap: 12px;
+            justify-content: center;
+            margin-top: 8px;
+        }
+        
+        .visual-card {
+            width: 94px;
+            height: 94px;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            font-size: 34px;
+            background: #fff;
+            transition: .16s ease;
+        }
+        
+        .visual-card:hover {
+            transform: translateY(-1px);
+        }
+        
+        .visual-card.selected {
+            background: var(--btn-strong);
+            border-color: #94bde8;
+        }
+        
+        .temporal-choice.selected {
+            background: var(--btn-strong) !important;
+            border-color: #94bde8 !important;
+        }
+        
+        .footer-note {
+            margin-top: 14px;
+            color: var(--sub);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(39, 59, 85, .28);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 16px;
+        }
+        
+        .modal-backdrop.show {
+            display: flex;
+        }
+        
+        .modal {
+            width: min(520px, 96vw);
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: 0 22px 50px rgba(51, 75, 103, .22);
+            border: 1px solid var(--line);
+            padding: 20px;
+        }
+        
+        .modal h3 {
+            margin: 0 0 10px;
+            font-size: 22px;
+        }
+        
+        .modal p {
+            color: var(--sub);
+            line-height: 1.7;
+        }
+        
+        .modal-grid {
+            display: grid;
+            gap: 12px;
+            margin-top: 14px;
+        }
+        
+        .setting-item {
+            background: #f8fbff;
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 14px;
+        }
+        
+        .setting-item label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .status-banner {
+            margin-bottom: 12px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: var(--warn);
+            color: #7a6531;
+            font-weight: 700;
+            display: none;
+        }
+        
+        .status-banner.show {
+            display: block;
+        }
+        
+        @media (max-width: 1100px) {
+            .welcome,
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            .brain-stage {
+                min-height: 520px;
+            }
+        }
+        
+        @media (max-width: 700px) {
+            .hero h1 {
+                font-size: 31px;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+            .detail-meta {
+                grid-template-columns: 1fr 1fr;
+            }
+            .quiz-grid {
+                grid-template-columns: repeat(3, 78px);
+            }
+            .quiz-cell {
+                width: 78px;
+                height: 78px;
+            }
+            .visual-grid {
+                grid-template-columns: repeat(3, 80px);
+            }
+            .visual-card {
+                width: 80px;
+                height: 80px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app">
+        <header class="topbar">
+            <div class="brand">
+                <div class="brain-badge">🧠</div>
+                <div>뇌 기능 기반 미니게임 웹</div>
+            </div>
+            <div class="top-actions">
+                <button class="btn ghost" id="goHomeBtn">처음 화면</button>
+                <button class="btn" id="openStatsBtn">통계</button>
+                <button class="btn strong" id="openSettingsBtn">설정</button>
+            </div>
+        </header>
+
+        <main>
+            <section class="screen active" id="startScreen">
+                <div class="welcome">
+                    <div class="panel hero">
+                        <h1>장애 아동도 쉽게 할 수 있는<br>뇌 기능 훈련 게임</h1>
+                        <p>
+                            한 화면 안에서 뇌 영역을 누르고, 바로 게임을 시작하고, 통계까지 같이 볼 수 있도록 만든 간단한 미니게임 웹입니다.
+                        </p>
+                        <div class="hero-actions">
+                            <button class="btn strong" id="startNowBtn">게임 시작하기</button>
+                            <button class="btn" id="statsNowBtn">통계 보기</button>
+                            <button class="btn ghost" id="directMainBtn">바로 메인 화면</button>
+                        </div>
+                    </div>
+
+                    <div class="panel">
+                        <div class="section-title">
+                            <h2>연결된 뇌 영역</h2>
+                            <p>각 영역마다 다른 훈련 게임</p>
+                        </div>
+
+                        <div class="mini-grid">
+                            <div class="mini-card">
+                                <h3>전두엽</h3>
+                                <p>계획, 판단, 집중 관련 게임</p>
+                            </div>
+                            <div class="mini-card">
+                                <h3>두정엽</h3>
+                                <p>공간 감각, 위치 파악 관련 게임</p>
+                            </div>
+                            <div class="mini-card">
+                                <h3>측두엽</h3>
+                                <p>소리 처리, 기억 관련 게임</p>
+                            </div>
+                            <div class="mini-card">
+                                <h3>후두엽</h3>
+                                <p>시각 처리 관련 게임</p>
+                            </div>
+                            <div class="mini-card">
+                                <h3>소뇌</h3>
+                                <p>반응속도, 타이밍, 운동 협응 게임</p>
+                            </div>
+                            <div class="mini-card">
+                                <h3>통계</h3>
+                                <p>플레이 횟수, 최고 점수, 정답률, 반응속도 저장</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="screen" id="mainScreen">
+                <div class="main-layout">
+                    <div class="panel brain-panel">
+                        <div class="section-title">
+                            <div>
+                                <h2>뇌 그림 선택 화면</h2>
+                                <p>영역을 누르면 해당 게임이 바로 시작됩니다.</p>
+                            </div>
+                        </div>
+
+                        <div class="brain-stage">
+                            <div class="brain-wrapper">
+                                <img class="brain-img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Brain_human_lateral_view.svg/1024px-Brain_human_lateral_view.svg.png" alt="뇌 그림" />
+
+                                <svg class="brain-svg" viewBox="0 0 1100 760" preserveAspectRatio="none">
+                  <defs>
+                    <mask id="highlightMask">
+                      <rect x="0" y="0" width="1100" height="760" fill="white"></rect>
+                      <polygon id="activeMaskPolygon" points="" fill="black"></polygon>
+                    </mask>
+                  </defs>
+
+                  <rect
+                    id="dimOverlay"
+                    x="0"
+                    y="0"
+                    width="1100"
+                    height="760"
+                    fill="rgba(30,43,63,0.55)"
+                    mask="url(#highlightMask)"
+                    style="display:none"
+                  ></rect>
+
+                  <polygon id="region-frontal" class="region" data-region="frontal"></polygon>
+                  <polygon id="region-parietal" class="region" data-region="parietal"></polygon>
+                  <polygon id="region-temporal" class="region" data-region="temporal"></polygon>
+                  <polygon id="region-occipital" class="region" data-region="occipital"></polygon>
+                  <polygon id="region-cerebellum" class="region" data-region="cerebellum"></polygon>
+                </svg>
+
+                                <div class="label-pill" id="brainLabel"></div>
+                            </div>
+                        </div>
+
+                        <div class="brain-help">
+                            <div class="tag">선택한 영역만 강조</div>
+                            <div class="tag">나머지 부분은 어둡게 처리</div>
+                            <div class="tag">영역 클릭 시 게임 시작</div>
+                            <div class="tag">해마는 측두엽에 포함</div>
+                        </div>
+                    </div>
+
+                    <div class="right-column">
+                        <div class="panel">
+                            <div class="section-title">
+                                <div>
+                                    <h2>간단 통계</h2>
+                                    <p>저장은 브라우저 로컬 저장 기준</p>
+                                </div>
+                                <button class="btn ghost" id="resetStatsBtn">통계 초기화</button>
+                            </div>
+
+                            <div class="stats-grid">
+                                <div class="stat-card">
+                                    <div class="label">전체 플레이</div>
+                                    <div class="value" id="totalPlaysValue">0</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="label">전체 최고 점수</div>
+                                    <div class="value" id="bestScoreValue">0</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="label">전체 정답률</div>
+                                    <div class="value" id="accuracyValue">0%</div>
+                                </div>
+                                <div class="stat-card">
+                                    <div class="label">최고 반응속도</div>
+                                    <div class="value" id="bestReactionValue">-</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel game-panel">
+                            <div class="section-title">
+                                <div>
+                                    <h2>게임 화면</h2>
+                                    <p>영역과 난이도를 고르면 바로 플레이</p>
+                                </div>
+                            </div>
+
+                            <div class="status-banner" id="gameStatusBanner"></div>
+
+                            <div class="inline-controls">
+                                <label>
+                  <select class="select" id="difficultySelect">
+                    <option value="easy">쉬운 게임</option>
+                    <option value="hard">어려운 게임</option>
+                  </select>
+                </label>
+                                <label>
+                  <select class="select hidden" id="hardLevelSelect">
+                    <option value="1">어려운 1단계</option>
+                    <option value="2">어려운 2단계</option>
+                    <option value="3">어려운 3단계</option>
+                    <option value="4">어려운 4단계</option>
+                    <option value="5">어려운 5단계</option>
+                    <option value="6">어려운 6단계</option>
+                    <option value="7">어려운 7단계</option>
+                    <option value="8">어려운 8단계</option>
+                    <option value="9">어려운 9단계</option>
+                    <option value="10">어려운 10단계</option>
+                  </select>
+                </label>
+                                <button class="btn ghost" id="restartGameBtn">현재 게임 다시하기</button>
+                            </div>
+
+                            <div class="game-shell" id="gameShell">
+                                <div class="center-box">
+                                    <div class="game-title">영역을 먼저 선택해주세요</div>
+                                    <div class="subline">
+                                        전두엽, 두정엽, 측두엽, 후두엽, 소뇌 중 하나를 누르면 해당 게임이 여기에 표시됩니다.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="footer-note">
+                                통계에는 플레이 횟수, 최고 점수, 정답 수, 시도 수, 정답률, 반응속도 기록이 저장됩니다.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel" style="margin-top:18px;">
+                    <div class="section-title">
+                        <div>
+                            <h2>세부 통계</h2>
+                            <p>게임별로 기록을 나눠서 확인할 수 있습니다.</p>
+                        </div>
+                    </div>
+                    <div class="detail-stats" id="detailStats"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div class="modal-backdrop" id="settingsModal">
+        <div class="modal">
+            <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                <h3>설정</h3>
+                <button class="btn ghost" id="closeSettingsBtn">닫기</button>
+            </div>
+            <p>
+                너무 복잡하지 않게, 게임 진행에 필요한 기본 옵션만 넣었습니다.
+            </p>
+            <div class="modal-grid">
+                <div class="setting-item">
+                    <label for="soundToggle">효과 문구 표시</label>
+                    <select class="select" id="soundToggle">
+            <option value="on">켜기</option>
+            <option value="off">끄기</option>
+          </select>
+                </div>
+                <div class="setting-item">
+                    <label for="autoShowStats">게임 결과 후 통계 문구</label>
+                    <select class="select" id="autoShowStats">
+            <option value="on">켜기</option>
+            <option value="off">끄기</option>
+          </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="statsModal">
+        <div class="modal">
+            <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
+                <h3>통계 보기</h3>
+                <button class="btn ghost" id="closeStatsBtn">닫기</button>
+            </div>
+            <p>
+                이 창은 빠르게 확인하는 용도입니다. 자세한 내용은 메인 화면 아래의 세부 통계에서 볼 수 있습니다.
+            </p>
+            <div class="modal-grid" id="quickStatsModalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        const STORAGE_KEY = "brain_game_stats_v4";
+        const SETTINGS_KEY = "brain_game_settings_v1";
+
+        const regions = {
+            frontal: {
+                key: "frontal",
+                name: "전두엽",
+                description: "계획, 판단, 집중 관련 게임",
+                points: [
+                    [471, 431],
+                    [463, 431],
+                    [455, 431],
+                    [450, 431],
+                    [443, 431],
+                    [438, 431],
+                    [432, 431],
+                    [429, 431],
+                    [424, 431],
+                    [413, 429],
+                    [408, 427],
+                    [404, 425],
+                    [398, 424],
+                    [395, 422],
+                    [392, 420],
+                    [388, 418],
+                    [384, 417],
+                    [380, 416],
+                    [375, 414],
+                    [372, 411],
+                    [369, 411],
+                    [368, 409],
+                    [362, 406],
+                    [359, 405],
+                    [357, 402],
+                    [354, 401],
+                    [350, 395],
+                    [350, 393],
+                    [348, 387],
+                    [346, 382],
+                    [346, 379],
+                    [345, 375],
+                    [342, 373],
+                    [341, 371],
+                    [338, 368],
+                    [337, 364],
+                    [335, 362],
+                    [334, 359],
+                    [332, 357],
+                    [330, 354],
+                    [330, 348],
+                    [327, 341],
+                    [326, 336],
+                    [326, 332],
+                    [327, 331],
+                    [330, 325],
+                    [331, 320],
+                    [332, 317],
+                    [330, 314],
+                    [327, 309],
+                    [327, 305],
+                    [325, 298],
+                    [323, 294],
+                    [325, 289],
+                    [325, 285],
+                    [325, 278],
+                    [328, 271],
+                    [328, 269],
+                    [328, 266],
+                    [331, 262],
+                    [332, 255],
+                    [332, 254],
+                    [335, 251],
+                    [338, 244],
+                    [341, 239],
+                    [342, 235],
+                    [342, 231],
+                    [343, 230],
+                    [345, 224],
+                    [347, 219],
+                    [350, 217],
+                    [352, 217],
+                    [355, 211],
+                    [358, 207],
+                    [361, 204],
+                    [365, 201],
+                    [368, 195],
+                    [372, 191],
+                    [373, 190],
+                    [377, 185],
+                    [379, 181],
+                    [384, 174],
+                    [388, 169],
+                    [392, 165],
+                    [395, 163],
+                    [397, 160],
+                    [400, 158],
+                    [402, 156],
+                    [406, 153],
+                    [409, 151],
+                    [415, 147],
+                    [420, 145],
+                    [422, 144],
+                    [427, 141],
+                    [429, 140],
+                    [433, 140],
+                    [438, 140],
+                    [440, 140],
+                    [444, 134],
+                    [445, 133],
+                    [448, 131],
+                    [451, 127],
+                    [454, 126],
+                    [456, 125],
+                    [460, 122],
+                    [463, 120],
+                    [465, 117],
+                    [470, 115],
+                    [476, 113],
+                    [481, 110],
+                    [485, 107],
+                    [488, 106],
+                    [494, 104],
+                    [498, 104],
+                    [505, 102],
+                    [515, 97],
+                    [519, 95],
+                    [524, 95],
+                    [532, 94],
+                    [537, 94],
+                    [541, 95],
+                    [545, 95],
+                    [548, 95],
+                    [551, 95],
+                    [553, 95],
+                    [555, 94],
+                    [557, 93],
+                    [560, 91],
+                    [562, 91],
+                    [565, 90],
+                    [567, 90],
+                    [569, 85],
+                    [576, 83],
+                    [582, 83],
+                    [585, 80],
+                    [588, 81],
+                    [591, 81],
+                    [594, 83],
+                    [596, 83],
+                    [599, 83],
+                    [603, 81],
+                    [605, 81],
+                    [605, 81],
+                    [608, 83],
+                    [615, 81],
+                    [616, 80],
+                    [622, 83],
+                    [628, 80],
+                    [634, 80],
+                    [649, 80],
+                    [657, 80],
+                    [663, 80],
+                    [668, 83],
+                    [672, 86],
+                    [676, 86],
+                    [680, 86],
+                    [685, 90],
+                    [686, 94],
+                    [687, 98],
+                    [688, 103],
+                    [687, 105],
+                    [686, 111],
+                    [686, 115],
+                    [685, 122],
+                    [683, 126],
+                    [682, 127],
+                    [677, 133],
+                    [674, 134],
+                    [671, 141],
+                    [668, 143],
+                    [665, 146],
+                    [665, 147],
+                    [662, 149],
+                    [662, 151],
+                    [659, 152],
+                    [657, 154],
+                    [652, 160],
+                    [651, 162],
+                    [647, 167],
+                    [647, 167],
+                    [644, 170],
+                    [643, 172],
+                    [640, 175],
+                    [636, 181],
+                    [633, 184],
+                    [629, 184],
+                    [625, 189],
+                    [628, 188],
+                    [627, 191],
+                    [625, 192],
+                    [625, 194],
+                    [623, 199],
+                    [620, 204],
+                    [618, 208],
+                    [615, 215],
+                    [615, 217],
+                    [615, 221],
+                    [614, 230],
+                    [614, 232],
+                    [614, 237],
+                    [614, 243],
+                    [614, 247],
+                    [614, 253],
+                    [615, 254],
+                    [615, 257],
+                    [615, 259],
+                    [615, 266],
+                    [615, 269],
+                    [615, 277],
+                    [615, 277],
+                    [615, 281],
+                    [615, 281],
+                    [615, 286],
+                    [615, 287],
+                    [615, 291],
+                    [615, 298],
+                    [615, 307],
+                    [615, 310],
+                    [615, 312],
+                    [615, 315],
+                    [614, 318],
+                    [612, 321],
+                    [609, 323],
+                    [606, 325],
+                    [603, 326],
+                    [601, 327],
+                    [596, 327],
+                    [593, 327],
+                    [589, 329],
+                    [585, 330],
+                    [581, 331],
+                    [577, 332],
+                    [574, 333],
+                    [570, 333],
+                    [566, 334],
+                    [559, 336],
+                    [552, 339],
+                    [545, 339],
+                    [541, 341],
+                    [536, 344],
+                    [533, 346],
+                    [531, 347],
+                    [529, 350],
+                    [525, 352],
+                    [525, 354],
+                    [521, 357],
+                    [518, 359],
+                    [514, 365],
+                    [509, 367],
+                    [507, 369],
+                    [504, 370],
+                    [502, 373],
+                    [500, 375],
+                    [497, 378],
+                    [495, 379],
+                    [493, 381],
+                    [491, 384],
+                    [489, 386],
+                    [488, 387],
+                    [488, 389],
+                    [484, 391],
+                    [482, 395],
+                    [479, 400],
+                    [477, 404],
+                    [477, 407],
+                    [475, 411],
+                    [475, 413],
+                    [472, 419],
+                    [472, 421],
+                    [472, 426],
+                    [472, 427]
+                ]
+            },
+            parietal: {
+                key: "parietal",
+                name: "두정엽",
+                description: "공간 감각, 위치 파악 관련 게임",
+                points: [
+                    [615, 317],
+                    [615, 313],
+                    [615, 307],
+                    [614, 301],
+                    [614, 294],
+                    [614, 291],
+                    [614, 285],
+                    [615, 279],
+                    [615, 270],
+                    [615, 264],
+                    [615, 257],
+                    [615, 252],
+                    [615, 248],
+                    [615, 239],
+                    [615, 237],
+                    [616, 231],
+                    [618, 223],
+                    [615, 217],
+                    [618, 214],
+                    [619, 205],
+                    [621, 201],
+                    [622, 197],
+                    [624, 194],
+                    [626, 190],
+                    [631, 184],
+                    [635, 180],
+                    [642, 171],
+                    [643, 167],
+                    [648, 162],
+                    [652, 160],
+                    [654, 157],
+                    [659, 153],
+                    [664, 150],
+                    [668, 146],
+                    [670, 142],
+                    [675, 135],
+                    [678, 133],
+                    [681, 128],
+                    [684, 123],
+                    [686, 117],
+                    [689, 109],
+                    [690, 106],
+                    [691, 101],
+                    [691, 96],
+                    [692, 91],
+                    [696, 89],
+                    [700, 86],
+                    [702, 84],
+                    [706, 84],
+                    [709, 84],
+                    [717, 84],
+                    [725, 85],
+                    [728, 87],
+                    [731, 89],
+                    [734, 90],
+                    [738, 91],
+                    [745, 93],
+                    [753, 95],
+                    [755, 96],
+                    [760, 100],
+                    [766, 104],
+                    [774, 103],
+                    [779, 104],
+                    [783, 105],
+                    [787, 108],
+                    [792, 111],
+                    [794, 112],
+                    [798, 114],
+                    [804, 115],
+                    [810, 119],
+                    [812, 120],
+                    [817, 123],
+                    [819, 125],
+                    [822, 127],
+                    [824, 128],
+                    [826, 130],
+                    [830, 132],
+                    [833, 134],
+                    [835, 136],
+                    [840, 141],
+                    [841, 141],
+                    [845, 144],
+                    [847, 147],
+                    [849, 149],
+                    [851, 150],
+                    [852, 151],
+                    [855, 154],
+                    [858, 155],
+                    [862, 161],
+                    [863, 164],
+                    [865, 166],
+                    [866, 169],
+                    [868, 174],
+                    [869, 175],
+                    [872, 177],
+                    [877, 181],
+                    [883, 187],
+                    [881, 184],
+                    [885, 187],
+                    [889, 190],
+                    [892, 191],
+                    [898, 198],
+                    [899, 201],
+                    [902, 205],
+                    [904, 207],
+                    [906, 212],
+                    [909, 216],
+                    [910, 217],
+                    [912, 224],
+                    [914, 227],
+                    [914, 234],
+                    [915, 238],
+                    [915, 240],
+                    [915, 241],
+                    [914, 243],
+                    [911, 243],
+                    [906, 244],
+                    [905, 244],
+                    [899, 247],
+                    [898, 248],
+                    [894, 254],
+                    [892, 257],
+                    [889, 261],
+                    [888, 263],
+                    [888, 264],
+                    [885, 267],
+                    [885, 267],
+                    [884, 271],
+                    [883, 274],
+                    [882, 275],
+                    [882, 278],
+                    [881, 280],
+                    [878, 281],
+                    [878, 284],
+                    [876, 286],
+                    [873, 291],
+                    [874, 291],
+                    [873, 294],
+                    [872, 296],
+                    [871, 299],
+                    [868, 302],
+                    [866, 307],
+                    [865, 308],
+                    [865, 308],
+                    [862, 311],
+                    [857, 314],
+                    [857, 315],
+                    [855, 318],
+                    [852, 322],
+                    [850, 324],
+                    [848, 327],
+                    [847, 327],
+                    [845, 328],
+                    [843, 329],
+                    [840, 333],
+                    [838, 334],
+                    [834, 337],
+                    [833, 339],
+                    [832, 340],
+                    [828, 338],
+                    [825, 337],
+                    [822, 337],
+                    [822, 336],
+                    [819, 336],
+                    [815, 337],
+                    [815, 337],
+                    [811, 337],
+                    [806, 334],
+                    [805, 333],
+                    [802, 332],
+                    [801, 331],
+                    [798, 329],
+                    [796, 328],
+                    [792, 328],
+                    [790, 327],
+                    [786, 327],
+                    [782, 325],
+                    [779, 321],
+                    [777, 320],
+                    [775, 320],
+                    [773, 317],
+                    [771, 316],
+                    [768, 316],
+                    [765, 315],
+                    [765, 315],
+                    [758, 310],
+                    [757, 307],
+                    [755, 305],
+                    [753, 302],
+                    [748, 301],
+                    [745, 300],
+                    [742, 299],
+                    [738, 297],
+                    [737, 295],
+                    [733, 291],
+                    [728, 290],
+                    [722, 289],
+                    [721, 289],
+                    [716, 288],
+                    [712, 287],
+                    [708, 288],
+                    [705, 289],
+                    [699, 289],
+                    [698, 289],
+                    [691, 290],
+                    [688, 290],
+                    [685, 291],
+                    [682, 291],
+                    [677, 292],
+                    [672, 294],
+                    [666, 295],
+                    [664, 296],
+                    [662, 297],
+                    [661, 297],
+                    [658, 297],
+                    [657, 297],
+                    [655, 300],
+                    [647, 302],
+                    [647, 303],
+                    [645, 304],
+                    [645, 304],
+                    [640, 304],
+                    [639, 305],
+                    [636, 306],
+                    [632, 307],
+                    [629, 308],
+                    [623, 311],
+                    [619, 312],
+                    [618, 313],
+                    [617, 313],
+                    [617, 313]
+                ]
+            },
+            temporal: {
+                key: "temporal",
+                name: "측두엽",
+                description: "소리 처리, 기억 관련 게임",
+                points: [
+                    [478, 451],
+                    [476, 445],
+                    [475, 440],
+                    [474, 435],
+                    [473, 434],
+                    [472, 431],
+                    [472, 426],
+                    [472, 424],
+                    [471, 423],
+                    [473, 418],
+                    [473, 417],
+                    [475, 412],
+                    [476, 407],
+                    [476, 407],
+                    [478, 403],
+                    [481, 401],
+                    [480, 399],
+                    [482, 397],
+                    [486, 394],
+                    [486, 392],
+                    [489, 389],
+                    [494, 386],
+                    [495, 384],
+                    [497, 381],
+                    [500, 377],
+                    [502, 375],
+                    [505, 372],
+                    [509, 367],
+                    [513, 364],
+                    [515, 362],
+                    [524, 356],
+                    [528, 353],
+                    [531, 349],
+                    [537, 346],
+                    [538, 345],
+                    [541, 343],
+                    [544, 342],
+                    [545, 341],
+                    [552, 338],
+                    [552, 337],
+                    [557, 337],
+                    [558, 337],
+                    [565, 335],
+                    [565, 335],
+                    [570, 334],
+                    [571, 334],
+                    [574, 334],
+                    [582, 332],
+                    [585, 332],
+                    [592, 329],
+                    [592, 329],
+                    [595, 327],
+                    [599, 327],
+                    [602, 327],
+                    [605, 326],
+                    [611, 324],
+                    [612, 324],
+                    [613, 323],
+                    [618, 315],
+                    [623, 315],
+                    [626, 314],
+                    [628, 314],
+                    [629, 314],
+                    [632, 313],
+                    [635, 312],
+                    [638, 310],
+                    [638, 310],
+                    [641, 307],
+                    [643, 307],
+                    [648, 305],
+                    [651, 303],
+                    [654, 302],
+                    [659, 301],
+                    [662, 300],
+                    [664, 299],
+                    [667, 297],
+                    [669, 297],
+                    [671, 297],
+                    [675, 294],
+                    [677, 294],
+                    [682, 292],
+                    [684, 291],
+                    [685, 291],
+                    [689, 291],
+                    [696, 289],
+                    [696, 289],
+                    [703, 288],
+                    [702, 288],
+                    [707, 288],
+                    [709, 288],
+                    [711, 288],
+                    [712, 288],
+                    [714, 288],
+                    [716, 288],
+                    [721, 289],
+                    [723, 289],
+                    [726, 290],
+                    [727, 290],
+                    [732, 291],
+                    [734, 292],
+                    [734, 292],
+                    [735, 294],
+                    [738, 295],
+                    [742, 298],
+                    [745, 300],
+                    [750, 304],
+                    [751, 304],
+                    [753, 306],
+                    [754, 307],
+                    [757, 311],
+                    [757, 311],
+                    [757, 311],
+                    [761, 315],
+                    [763, 315],
+                    [766, 317],
+                    [767, 318],
+                    [772, 321],
+                    [777, 324],
+                    [780, 327],
+                    [780, 327],
+                    [782, 327],
+                    [786, 327],
+                    [788, 327],
+                    [793, 332],
+                    [795, 333],
+                    [796, 333],
+                    [798, 333],
+                    [800, 333],
+                    [804, 334],
+                    [806, 335],
+                    [810, 337],
+                    [812, 337],
+                    [817, 338],
+                    [822, 341],
+                    [825, 341],
+                    [829, 343],
+                    [831, 345],
+                    [832, 349],
+                    [834, 351],
+                    [834, 352],
+                    [834, 356],
+                    [835, 358],
+                    [835, 363],
+                    [836, 365],
+                    [836, 369],
+                    [836, 371],
+                    [836, 374],
+                    [836, 376],
+                    [835, 381],
+                    [834, 381],
+                    [834, 384],
+                    [834, 386],
+                    [834, 387],
+                    [834, 391],
+                    [833, 394],
+                    [833, 397],
+                    [832, 400],
+                    [832, 403],
+                    [832, 407],
+                    [831, 411],
+                    [829, 415],
+                    [829, 416],
+                    [828, 421],
+                    [828, 421],
+                    [825, 424],
+                    [822, 426],
+                    [818, 429],
+                    [818, 432],
+                    [815, 434],
+                    [812, 434],
+                    [810, 434],
+                    [807, 435],
+                    [804, 435],
+                    [801, 435],
+                    [794, 437],
+                    [788, 437],
+                    [785, 440],
+                    [779, 441],
+                    [775, 442],
+                    [774, 442],
+                    [771, 442],
+                    [764, 442],
+                    [764, 441],
+                    [758, 442],
+                    [756, 443],
+                    [754, 443],
+                    [750, 444],
+                    [745, 444],
+                    [742, 444],
+                    [738, 444],
+                    [735, 445],
+                    [732, 446],
+                    [728, 448],
+                    [724, 449],
+                    [724, 451],
+                    [722, 451],
+                    [720, 451],
+                    [715, 451],
+                    [713, 451],
+                    [710, 454],
+                    [708, 455],
+                    [702, 456],
+                    [698, 457],
+                    [695, 457],
+                    [689, 457],
+                    [688, 458],
+                    [685, 458],
+                    [678, 459],
+                    [674, 459],
+                    [670, 461],
+                    [667, 462],
+                    [664, 464],
+                    [662, 464],
+                    [661, 466],
+                    [654, 467],
+                    [654, 467],
+                    [651, 469],
+                    [648, 472],
+                    [645, 472],
+                    [642, 474],
+                    [639, 477],
+                    [637, 477],
+                    [635, 478],
+                    [632, 480],
+                    [631, 480],
+                    [629, 481],
+                    [626, 481],
+                    [622, 485],
+                    [618, 486],
+                    [616, 487],
+                    [615, 488],
+                    [613, 488],
+                    [611, 491],
+                    [609, 492],
+                    [605, 494],
+                    [602, 494],
+                    [599, 497],
+                    [596, 498],
+                    [592, 498],
+                    [588, 499],
+                    [586, 499],
+                    [583, 501],
+                    [581, 501],
+                    [578, 502],
+                    [575, 502],
+                    [572, 502],
+                    [568, 502],
+                    [565, 502],
+                    [562, 502],
+                    [560, 502],
+                    [559, 502],
+                    [557, 502],
+                    [555, 502],
+                    [549, 501],
+                    [546, 500],
+                    [545, 500],
+                    [538, 499],
+                    [537, 499],
+                    [534, 497],
+                    [532, 496],
+                    [529, 495],
+                    [529, 495],
+                    [527, 493],
+                    [522, 491],
+                    [518, 491],
+                    [517, 489],
+                    [513, 488],
+                    [508, 487],
+                    [503, 485],
+                    [502, 484],
+                    [498, 482],
+                    [495, 480],
+                    [492, 477],
+                    [491, 475],
+                    [488, 474],
+                    [484, 467],
+                    [483, 464],
+                    [481, 461],
+                    [478, 458],
+                    [478, 456],
+                    [478, 455]
+                ]
+            },
+            occipital: {
+                key: "occipital",
+                name: "후두엽",
+                description: "시각 처리 관련 게임",
+                points: [
+                    [830, 342],
+                    [833, 341],
+                    [836, 339],
+                    [840, 337],
+                    [844, 334],
+                    [845, 334],
+                    [846, 333],
+                    [846, 331],
+                    [847, 330],
+                    [852, 328],
+                    [852, 327],
+                    [852, 326],
+                    [853, 324],
+                    [855, 324],
+                    [855, 323],
+                    [856, 319],
+                    [858, 317],
+                    [860, 314],
+                    [861, 312],
+                    [862, 311],
+                    [863, 310],
+                    [863, 308],
+                    [864, 307],
+                    [864, 307],
+                    [866, 304],
+                    [868, 303],
+                    [868, 302],
+                    [868, 301],
+                    [869, 299],
+                    [871, 296],
+                    [871, 294],
+                    [872, 294],
+                    [872, 291],
+                    [873, 291],
+                    [874, 289],
+                    [876, 287],
+                    [877, 286],
+                    [878, 284],
+                    [878, 283],
+                    [878, 281],
+                    [880, 280],
+                    [882, 276],
+                    [883, 274],
+                    [883, 273],
+                    [884, 270],
+                    [885, 267],
+                    [888, 264],
+                    [889, 263],
+                    [891, 260],
+                    [892, 257],
+                    [896, 252],
+                    [898, 251],
+                    [901, 248],
+                    [903, 247],
+                    [906, 246],
+                    [908, 245],
+                    [909, 245],
+                    [910, 245],
+                    [912, 245],
+                    [914, 245],
+                    [915, 244],
+                    [917, 244],
+                    [921, 247],
+                    [922, 248],
+                    [925, 249],
+                    [927, 250],
+                    [927, 251],
+                    [930, 255],
+                    [932, 258],
+                    [932, 260],
+                    [934, 264],
+                    [936, 267],
+                    [936, 269],
+                    [937, 271],
+                    [938, 273],
+                    [938, 276],
+                    [938, 280],
+                    [938, 284],
+                    [941, 286],
+                    [942, 287],
+                    [944, 291],
+                    [945, 291],
+                    [948, 295],
+                    [948, 295],
+                    [949, 296],
+                    [950, 298],
+                    [952, 301],
+                    [952, 302],
+                    [953, 306],
+                    [955, 311],
+                    [955, 311],
+                    [957, 317],
+                    [957, 318],
+                    [957, 319],
+                    [958, 321],
+                    [958, 324],
+                    [958, 325],
+                    [959, 328],
+                    [960, 331],
+                    [961, 334],
+                    [962, 338],
+                    [962, 339],
+                    [962, 341],
+                    [963, 343],
+                    [963, 344],
+                    [964, 349],
+                    [964, 352],
+                    [964, 356],
+                    [964, 360],
+                    [964, 361],
+                    [965, 362],
+                    [965, 365],
+                    [965, 367],
+                    [965, 367],
+                    [965, 371],
+                    [965, 373],
+                    [965, 377],
+                    [965, 381],
+                    [965, 384],
+                    [965, 387],
+                    [965, 387],
+                    [966, 389],
+                    [965, 393],
+                    [965, 397],
+                    [963, 398],
+                    [962, 401],
+                    [962, 406],
+                    [962, 409],
+                    [962, 410],
+                    [959, 414],
+                    [957, 418],
+                    [954, 421],
+                    [953, 424],
+                    [952, 426],
+                    [949, 427],
+                    [948, 432],
+                    [948, 433],
+                    [944, 441],
+                    [943, 441],
+                    [947, 436],
+                    [947, 437],
+                    [946, 440],
+                    [945, 441],
+                    [942, 443],
+                    [941, 446],
+                    [940, 447],
+                    [938, 448],
+                    [937, 451],
+                    [935, 451],
+                    [930, 454],
+                    [927, 454],
+                    [924, 457],
+                    [920, 457],
+                    [917, 457],
+                    [915, 458],
+                    [913, 458],
+                    [908, 457],
+                    [904, 457],
+                    [899, 456],
+                    [895, 455],
+                    [889, 454],
+                    [884, 454],
+                    [882, 453],
+                    [878, 453],
+                    [875, 452],
+                    [874, 451],
+                    [871, 451],
+                    [865, 450],
+                    [861, 448],
+                    [858, 447],
+                    [854, 447],
+                    [850, 447],
+                    [845, 445],
+                    [843, 445],
+                    [835, 444],
+                    [831, 443],
+                    [828, 441],
+                    [825, 441],
+                    [822, 440],
+                    [818, 439],
+                    [817, 439],
+                    [817, 437],
+                    [818, 437],
+                    [819, 434],
+                    [820, 431],
+                    [821, 431],
+                    [823, 428],
+                    [824, 426],
+                    [825, 424],
+                    [826, 423],
+                    [828, 420],
+                    [828, 417],
+                    [832, 413],
+                    [832, 411],
+                    [833, 408],
+                    [833, 405],
+                    [833, 402],
+                    [833, 400],
+                    [834, 397],
+                    [834, 397],
+                    [834, 394],
+                    [835, 393],
+                    [835, 391],
+                    [835, 387],
+                    [835, 383],
+                    [835, 381],
+                    [835, 377],
+                    [835, 375],
+                    [835, 373],
+                    [836, 371],
+                    [836, 367],
+                    [835, 365],
+                    [835, 361],
+                    [835, 359],
+                    [835, 351],
+                    [833, 349],
+                    [832, 346],
+                    [831, 344],
+                    [830, 344]
+                ]
+            },
+            cerebellum: {
+                key: "cerebellum",
+                name: "소뇌",
+                description: "반응속도, 타이밍, 운동 협응 관련 게임",
+                points: [
+                    [768, 611],
+                    [767, 611],
+                    [765, 611],
+                    [765, 614],
+                    [765, 614],
+                    [762, 615],
+                    [759, 616],
+                    [758, 616],
+                    [755, 617],
+                    [752, 618],
+                    [748, 616],
+                    [742, 617],
+                    [737, 616],
+                    [737, 616],
+                    [733, 612],
+                    [728, 607],
+                    [728, 605],
+                    [726, 600],
+                    [724, 597],
+                    [724, 597],
+                    [722, 595],
+                    [722, 592],
+                    [720, 591],
+                    [719, 589],
+                    [717, 588],
+                    [717, 586],
+                    [717, 584],
+                    [716, 584],
+                    [714, 583],
+                    [714, 581],
+                    [712, 578],
+                    [712, 576],
+                    [709, 574],
+                    [708, 573],
+                    [705, 572],
+                    [705, 572],
+                    [705, 570],
+                    [701, 567],
+                    [700, 567],
+                    [700, 565],
+                    [697, 562],
+                    [695, 560],
+                    [694, 559],
+                    [692, 557],
+                    [690, 556],
+                    [690, 551],
+                    [688, 551],
+                    [688, 549],
+                    [687, 548],
+                    [686, 546],
+                    [685, 541],
+                    [685, 541],
+                    [685, 538],
+                    [683, 535],
+                    [679, 533],
+                    [679, 530],
+                    [677, 529],
+                    [674, 527],
+                    [672, 526],
+                    [668, 524],
+                    [668, 524],
+                    [665, 522],
+                    [662, 520],
+                    [659, 519],
+                    [655, 518],
+                    [654, 516],
+                    [652, 515],
+                    [652, 515],
+                    [649, 514],
+                    [647, 511],
+                    [647, 508],
+                    [644, 505],
+                    [640, 501],
+                    [638, 498],
+                    [638, 497],
+                    [634, 494],
+                    [633, 491],
+                    [633, 489],
+                    [633, 487],
+                    [631, 484],
+                    [633, 483],
+                    [641, 478],
+                    [643, 477],
+                    [647, 475],
+                    [650, 474],
+                    [655, 471],
+                    [658, 470],
+                    [660, 468],
+                    [665, 466],
+                    [668, 464],
+                    [669, 464],
+                    [673, 464],
+                    [678, 463],
+                    [682, 462],
+                    [685, 462],
+                    [690, 460],
+                    [691, 460],
+                    [697, 460],
+                    [701, 460],
+                    [704, 460],
+                    [709, 457],
+                    [715, 457],
+                    [719, 457],
+                    [723, 452],
+                    [725, 451],
+                    [727, 451],
+                    [729, 448],
+                    [732, 447],
+                    [736, 446],
+                    [742, 446],
+                    [747, 444],
+                    [752, 444],
+                    [757, 446],
+                    [759, 446],
+                    [762, 446],
+                    [768, 444],
+                    [773, 444],
+                    [775, 444],
+                    [779, 444],
+                    [784, 444],
+                    [789, 443],
+                    [794, 443],
+                    [798, 441],
+                    [803, 441],
+                    [805, 440],
+                    [811, 438],
+                    [813, 438],
+                    [815, 438],
+                    [819, 439],
+                    [822, 441],
+                    [824, 441],
+                    [828, 443],
+                    [830, 443],
+                    [833, 443],
+                    [838, 443],
+                    [842, 443],
+                    [844, 444],
+                    [848, 444],
+                    [848, 444],
+                    [852, 446],
+                    [857, 446],
+                    [860, 447],
+                    [863, 447],
+                    [867, 447],
+                    [871, 447],
+                    [873, 449],
+                    [878, 450],
+                    [884, 451],
+                    [889, 452],
+                    [892, 454],
+                    [895, 454],
+                    [899, 457],
+                    [902, 458],
+                    [905, 462],
+                    [905, 466],
+                    [908, 468],
+                    [908, 471],
+                    [908, 475],
+                    [908, 477],
+                    [908, 480],
+                    [908, 481],
+                    [908, 484],
+                    [908, 489],
+                    [908, 490],
+                    [907, 492],
+                    [905, 495],
+                    [903, 497],
+                    [903, 497],
+                    [902, 501],
+                    [900, 501],
+                    [900, 503],
+                    [897, 507],
+                    [896, 508],
+                    [896, 509],
+                    [892, 511],
+                    [892, 511],
+                    [892, 516],
+                    [891, 521],
+                    [891, 521],
+                    [888, 525],
+                    [888, 527],
+                    [883, 531],
+                    [881, 534],
+                    [878, 537],
+                    [877, 540],
+                    [875, 541],
+                    [875, 541],
+                    [871, 543],
+                    [869, 544],
+                    [862, 548],
+                    [865, 548],
+                    [862, 552],
+                    [860, 551],
+                    [860, 551],
+                    [855, 554],
+                    [853, 555],
+                    [852, 557],
+                    [848, 557],
+                    [845, 560],
+                    [841, 561],
+                    [835, 563],
+                    [828, 562],
+                    [827, 561],
+                    [824, 561],
+                    [821, 561],
+                    [815, 561],
+                    [810, 560],
+                    [806, 560],
+                    [805, 562],
+                    [802, 563],
+                    [800, 563],
+                    [795, 564],
+                    [794, 564],
+                    [791, 565],
+                    [786, 566],
+                    [783, 568],
+                    [778, 568],
+                    [769, 568],
+                    [765, 568],
+                    [762, 568],
+                    [756, 567],
+                    [758, 573],
+                    [759, 574],
+                    [760, 577],
+                    [762, 581],
+                    [762, 584],
+                    [763, 586],
+                    [765, 589],
+                    [766, 590],
+                    [768, 595],
+                    [768, 598],
+                    [770, 601],
+                    [770, 605],
+                    [770, 606],
+                    [769, 608],
+                    [768, 609]
+                ]
+            }
+        };
+
+        const defaultStats = () => ({
+            totalPlays: 0,
+            bestScore: 0,
+            totalCorrect: 0,
+            totalAttempts: 0,
+            bestReaction: null,
+            regions: {
+                frontal: {
+                    plays: 0,
+                    bestScore: 0,
+                    correct: 0,
+                    attempts: 0,
+                    bestReaction: null
+                },
+                parietal: {
+                    plays: 0,
+                    bestScore: 0,
+                    correct: 0,
+                    attempts: 0,
+                    bestReaction: null
+                },
+                temporal: {
+                    plays: 0,
+                    bestScore: 0,
+                    correct: 0,
+                    attempts: 0,
+                    bestReaction: null
+                },
+                occipital: {
+                    plays: 0,
+                    bestScore: 0,
+                    correct: 0,
+                    attempts: 0,
+                    bestReaction: null
+                },
+                cerebellum: {
+                    plays: 0,
+                    bestScore: 0,
+                    correct: 0,
+                    attempts: 0,
+                    bestReaction: null
+                }
+            }
+        });
+
+        const defaultSettings = () => ({
+            effectText: "on",
+            resultHint: "on"
+        });
+
+        let stats = loadStats();
+        let settings = loadSettings();
+        let selectedRegionKey = null;
+        let activeGameState = null;
+
+        const startScreen = document.getElementById("startScreen");
+        const mainScreen = document.getElementById("mainScreen");
+        const brainLabel = document.getElementById("brainLabel");
+        const dimOverlay = document.getElementById("dimOverlay");
+        const activeMaskPolygon = document.getElementById("activeMaskPolygon");
+        const difficultySelect = document.getElementById("difficultySelect");
+        const hardLevelSelect = document.getElementById("hardLevelSelect");
+        const gameShell = document.getElementById("gameShell");
+        const gameStatusBanner = document.getElementById("gameStatusBanner");
+
+        function loadStats() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
+                if (parsed && parsed.regions) return parsed;
+            } catch (e) {}
+            return defaultStats();
+        }
+
+        function saveStats() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(stats));
+        }
+
+        function loadSettings() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(SETTINGS_KEY));
+                if (parsed) return parsed;
+            } catch (e) {}
+            return defaultSettings();
+        }
+
+        function saveSettings() {
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        }
+
+        function pointsToString(points) {
+            return points.map(p => p.join(",")).join(" ");
+        }
+
+        function initRegions() {
+            Object.values(regions).forEach(region => {
+                const el = document.getElementById(`region-${region.key}`);
+                el.setAttribute("points", pointsToString(region.points));
+                el.addEventListener("click", () => selectRegion(region.key));
+            });
+        }
+
+        function showScreen(name) {
+            startScreen.classList.remove("active");
+            mainScreen.classList.remove("active");
+            if (name === "start") {
+                startScreen.classList.add("active");
+            } else {
+                mainScreen.classList.add("active");
+            }
+        }
+
+        function selectRegion(regionKey) {
+            selectedRegionKey = regionKey;
+            const region = regions[regionKey];
+
+            document.querySelectorAll(".region").forEach(el => {
+                el.classList.remove("active");
+                el.classList.add("dimmed");
+            });
+
+            const activeEl = document.getElementById(`region-${regionKey}`);
+            activeEl.classList.add("active");
+            activeEl.classList.remove("dimmed");
+
+            dimOverlay.style.display = "block";
+            activeMaskPolygon.setAttribute("points", pointsToString(region.points));
+
+            positionBrainLabel(region);
+            startSelectedGame();
+        }
+
+        function clearRegionSelection() {
+            selectedRegionKey = null;
+            document.querySelectorAll(".region").forEach(el => {
+                el.classList.remove("active", "dimmed");
+            });
+            dimOverlay.style.display = "none";
+            activeMaskPolygon.setAttribute("points", "");
+            brainLabel.classList.remove("show");
+        }
+
+        function positionBrainLabel(region) {
+            let minX = Infinity,
+                minY = Infinity,
+                maxX = -Infinity,
+                maxY = -Infinity;
+            region.points.forEach(([x, y]) => {
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x);
+                maxY = Math.max(maxY, y);
+            });
+
+            const centerX = (minX + maxX) / 2;
+            const centerY = minY - 18;
+
+            brainLabel.textContent = `${region.name} 선택됨`;
+            brainLabel.style.left = `${(centerX / 1100) * 100}%`;
+            brainLabel.style.top = `${(centerY / 760) * 100}%`;
+            brainLabel.style.transform = "translate(-50%, -100%)";
+            brainLabel.classList.add("show");
+        }
+
+        function getDifficultyConfig() {
+            const difficulty = difficultySelect.value;
+            const hardLevel = Number(hardLevelSelect.value);
+            if (difficulty === "easy") {
+                return {
+                    difficulty,
+                    hardLevel: 1
+                };
+            }
+            return {
+                difficulty,
+                hardLevel
+            };
+        }
+
+        function updateDifficultyUI() {
+            if (difficultySelect.value === "hard") {
+                hardLevelSelect.classList.remove("hidden");
+            } else {
+                hardLevelSelect.classList.add("hidden");
+            }
+
+            if (selectedRegionKey) {
+                startSelectedGame();
+            }
+        }
+
+        function showStatus(text) {
+            if (settings.effectText !== "on") return;
+            gameStatusBanner.textContent = text;
+            gameStatusBanner.classList.add("show");
+            clearTimeout(showStatus._t);
+            showStatus._t = setTimeout(() => {
+                gameStatusBanner.classList.remove("show");
+            }, 1800);
+        }
+
+        function regionStats(regionKey) {
+            return stats.regions[regionKey];
+        }
+
+        function registerPlay(regionKey) {
+            stats.totalPlays += 1;
+            regionStats(regionKey).plays += 1;
+        }
+
+        function registerScore(regionKey, score) {
+            stats.bestScore = Math.max(stats.bestScore, score);
+            regionStats(regionKey).bestScore = Math.max(regionStats(regionKey).bestScore, score);
+        }
+
+        function registerAttempt(regionKey, correct, countAttempt = true) {
+            if (countAttempt) {
+                stats.totalAttempts += 1;
+                regionStats(regionKey).attempts += 1;
+            }
+            if (correct) {
+                stats.totalCorrect += 1;
+                regionStats(regionKey).correct += 1;
+            }
+        }
+
+        function registerReaction(regionKey, ms) {
+            if (stats.bestReaction === null || ms < stats.bestReaction) {
+                stats.bestReaction = ms;
+            }
+            const region = regionStats(regionKey);
+            if (region.bestReaction === null || ms < region.bestReaction) {
+                region.bestReaction = ms;
+            }
+        }
+
+        function finishGame(regionKey, score) {
+            registerScore(regionKey, score);
+            saveStats();
+            renderStats();
+            if (settings.resultHint === "on") {
+                showStatus(`결과 저장 완료 · 점수 ${score}`);
+            }
+        }
+
+        function startSelectedGame() {
+            if (!selectedRegionKey) return;
+            const region = regions[selectedRegionKey];
+            const {
+                difficulty,
+                hardLevel
+            } = getDifficultyConfig();
+
+            if (region.key === "frontal") renderFrontalGame(difficulty, hardLevel);
+            if (region.key === "parietal") renderParietalGame(difficulty, hardLevel);
+            if (region.key === "temporal") renderTemporalGame(difficulty, hardLevel);
+            if (region.key === "occipital") renderOccipitalGame(difficulty, hardLevel);
+            if (region.key === "cerebellum") renderCerebellumGame(difficulty, hardLevel);
+        }
+
+        function renderGameLayout(title, subtitle, innerHTML) {
+            gameShell.innerHTML = `
+        <div class="game-header">
+          <div>
+            <div class="game-title">${title}</div>
+            <div class="subline">${subtitle}</div>
+          </div>
+        </div>
+        ${innerHTML}
+      `;
+        }
+
+        function renderFrontalGame(difficulty, hardLevel) {
+            registerPlay("frontal");
+            saveStats();
+            renderStats();
+
+            const count = difficulty === "easy" ? 4 : Math.min(4 + hardLevel, 12);
+            const numbers = Array.from({
+                length: count
+            }, () => Math.floor(Math.random() * 10));
+            activeGameState = {
+                type: "frontal",
+                answer: numbers.join(""),
+                shown: true,
+                regionKey: "frontal"
+            };
+
+            renderGameLayout(
+                "전두엽 게임 · 숫자 기억",
+                "잠깐 보이는 숫자를 기억한 뒤 그대로 입력하세요.",
+                `
+          <div class="center-box">
+            <div class="big-number" id="frontalDisplay">${numbers.join(" ")}</div>
+            <div class="subline">숫자가 잠시 뒤 사라집니다.</div>
+          </div>
+        `
+            );
+
+            const showMs = difficulty === "easy" ? 1800 : Math.max(700, 1800 - hardLevel * 90);
+
+            setTimeout(() => {
+                if (!activeGameState || activeGameState.type !== "frontal") return;
+                activeGameState.shown = false;
+                gameShell.innerHTML = `
+          <div class="game-header">
+            <div>
+              <div class="game-title">전두엽 게임 · 숫자 기억</div>
+              <div class="subline">숫자를 순서대로 입력해보세요.</div>
+            </div>
+          </div>
+          <div class="center-box">
+            <div class="answer-row">
+              <input class="text-input" id="frontalInput" placeholder="숫자 입력" autocomplete="off">
+              <button class="btn strong" id="frontalSubmitBtn">확인</button>
+            </div>
+          </div>
+        `;
+                const input = document.getElementById("frontalInput");
+                input.focus();
+                input.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter") submitFrontal();
+                });
+                document.getElementById("frontalSubmitBtn").addEventListener("click", submitFrontal);
+            }, showMs);
+        }
+
+        function submitFrontal() {
+            if (!activeGameState || activeGameState.type !== "frontal") return;
+            const input = document.getElementById("frontalInput");
+            const val = (input.value || "").replace(/\s/g, "");
+            const correct = val === activeGameState.answer;
+            registerAttempt("frontal", correct, true);
+            const score = correct ? activeGameState.answer.length * 10 : 0;
+            finishGame("frontal", score);
+
+            renderGameLayout(
+                "전두엽 게임 · 결과",
+                correct ? "잘 기억했어요." : "아쉽지만 다시 해볼 수 있어요.",
+                `
+          <div class="center-box">
+            <div class="big-word">${correct ? "정답!" : "오답"}</div>
+            <div class="subline">정답: ${activeGameState.answer}</div>
+            <div class="subline">입력: ${val || "(빈칸)"}</div>
+            <button class="btn strong" id="retryFrontalBtn">다시하기</button>
+          </div>
+        `
+            );
+            document.getElementById("retryFrontalBtn").addEventListener("click", startSelectedGame);
+        }
+
+        function renderParietalGame(difficulty, hardLevel) {
+            registerPlay("parietal");
+            saveStats();
+            renderStats();
+
+            const targetIndex = Math.floor(Math.random() * 9);
+            const targetRow = Math.floor(targetIndex / 3) + 1;
+            const targetCol = (targetIndex % 3) + 1;
+            activeGameState = {
+                type: "parietal",
+                regionKey: "parietal",
+                targetIndex
+            };
+
+            const labels = Array.from({
+                length: 9
+            }, (_, i) => {
+                if (difficulty === "easy") {
+                    return i === targetIndex ? "★" : "○";
+                }
+                return i === targetIndex ? "★" : (Math.random() < 0.5 ? "△" : "○");
+            });
+
+            renderGameLayout(
+                    "두정엽 게임 · 위치 찾기",
+                    `목표 위치: ${targetRow}행 ${targetCol}열`,
+                    `
+          <div class="center-box">
+            <div class="subline">아래 칸 중 목표 위치를 눌러보세요.</div>
+            <div class="quiz-grid" id="parietalGrid">
+              ${labels.map((label, idx)=>`<button class="quiz-cell" data-idx="${idx}">${label}</button>`).join("")}
+            </div>
+          </div>
+        `
+      );
+
+      document.querySelectorAll("#parietalGrid .quiz-cell").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const idx = Number(btn.dataset.idx);
+          const correct = idx === activeGameState.targetIndex;
+          registerAttempt("parietal", correct, true);
+          const score = correct ? (difficulty === "easy" ? 10 : 10 + hardLevel * 4) : 0;
+          finishGame("parietal", score);
+
+          renderGameLayout(
+            "두정엽 게임 · 결과",
+            correct ? "위치를 잘 찾았어요." : "다음에는 더 천천히 찾아보세요.",
+            `
+              <div class="center-box">
+                <div class="big-word">${correct ? "정답!" : "오답"}</div>
+                <div class="subline">정답 위치: ${Math.floor(activeGameState.targetIndex / 3) + 1}행 ${(activeGameState.targetIndex % 3) + 1}열</div>
+                <button class="btn strong" id="retryParietalBtn">다시하기</button>
+              </div>
+            `
+          );
+          document.getElementById("retryParietalBtn").addEventListener("click", startSelectedGame);
+        });
+      });
+    }
+
+    function renderTemporalGame(difficulty, hardLevel){
+      registerPlay("temporal");
+      saveStats();
+      renderStats();
+
+      const wordSetsEasy = ["사과", "바나나", "포도"];
+      const wordSetsHard = ["사과", "바나나", "포도", "수박", "복숭아", "딸기", "귤", "참외"];
+      const source = difficulty === "easy" ? wordSetsEasy : wordSetsHard;
+      const count = difficulty === "easy" ? 3 : Math.min(3 + Math.floor(hardLevel / 2), 7);
+
+      const shuffled = [...source].sort(()=>Math.random()-0.5);
+      const selected = shuffled.slice(0, count);
+
+      activeGameState = {
+        type: "temporal",
+        regionKey: "temporal",
+        selectedWords: selected,
+        pickedWords: new Set()
+      };
+
+      renderGameLayout(
+        "측두엽 게임 · 기억하기",
+        "단어를 잠깐 보고 기억한 뒤, 본 단어를 모두 선택하세요.",
+        `
+          <div class="center-box">
+            <div class="big-word" style="font-size:34px;">${selected.join(" · ")}</div>
+            <div class="subline">잠시 뒤 선택 화면으로 바뀝니다.</div>
+          </div>
+        `
+      );
+
+      const showMs = difficulty === "easy" ? 2200 : Math.max(1000, 2200 - hardLevel * 100);
+
+      setTimeout(()=>{
+        if(!activeGameState || activeGameState.type !== "temporal") return;
+
+        const choicesBase = [...new Set([...wordSetsHard, "레몬", "자두", "배", "키위"])];
+        const answers = [...activeGameState.selectedWords];
+        const neededWrong = Math.max(3, 8 - answers.length);
+        const wrongs = choicesBase
+          .filter(w => !answers.includes(w))
+          .sort(()=>Math.random()-0.5)
+          .slice(0, neededWrong);
+
+        const choices = [...answers, ...wrongs].sort(()=>Math.random()-0.5);
+
+        renderGameLayout(
+          "측두엽 게임 · 기억하기",
+          "아까 본 단어를 모두 눌러 선택한 뒤 확인하세요.",
+          `
+            <div class="center-box">
+              <div class="quiz-grid" style="grid-template-columns:repeat(3, 110px);">
+                ${choices.map(word => `
+                  <button type="button" class="btn ghost temporal-choice" data-word="${word}" style="padding:18px 12px;">
+                    ${word}
+                  </button>
+                `).join("")}
+              </div>
+              <button type="button" class="btn strong" id="temporalSubmitBtn">확인</button>
+            </div>
+          `
+        );
+
+        document.querySelectorAll(".temporal-choice").forEach(btn=>{
+          btn.addEventListener("click", ()=>{
+            const word = btn.dataset.word;
+            if(activeGameState.pickedWords.has(word)){
+              activeGameState.pickedWords.delete(word);
+              btn.classList.remove("selected");
+            }else{
+              activeGameState.pickedWords.add(word);
+              btn.classList.add("selected");
+            }
+          });
+        });
+
+        document.getElementById("temporalSubmitBtn").addEventListener("click", ()=>{
+          const answerSet = new Set(activeGameState.selectedWords);
+          const picked = activeGameState.pickedWords;
+
+          let correct = true;
+          if(picked.size !== answerSet.size) correct = false;
+          for(const word of answerSet){
+            if(!picked.has(word)){
+              correct = false;
+              break;
+            }
+          }
+
+          registerAttempt("temporal", correct, true);
+          const score = correct ? activeGameState.selectedWords.length * 10 : 0;
+          finishGame("temporal", score);
+
+          renderGameLayout(
+            "측두엽 게임 · 결과",
+            correct ? "기억을 잘했어요." : "조금 헷갈렸네요. 다시 해볼 수 있어요.",
+            `
+              <div class="center-box">
+                <div class="big-word">${correct ? "정답!" : "오답"}</div>
+                <div class="subline">정답 단어: ${activeGameState.selectedWords.join(", ")}</div>
+                <button class="btn strong" id="retryTemporalBtn">다시하기</button>
+              </div>
+            `
+          );
+          document.getElementById("retryTemporalBtn").addEventListener("click", startSelectedGame);
+        });
+      }, showMs);
+    }
+
+    function renderOccipitalGame(difficulty, hardLevel){
+      registerPlay("occipital");
+      saveStats();
+      renderStats();
+
+      const shapes = ["●","■","▲","◆","★"];
+      const target = shapes[Math.floor(Math.random() * shapes.length)];
+      const total = 9;
+      const targetCount = difficulty === "easy" ? 1 : Math.min(1 + Math.floor(hardLevel / 3), 3);
+      const pool = [];
+
+      for(let i=0; i<targetCount; i++) pool.push(target);
+      while(pool.length < total){
+        const s = shapes[Math.floor(Math.random() * shapes.length)];
+        if(difficulty === "easy"){
+          if(s !== target) pool.push(s);
+        }else{
+          pool.push(s);
+        }
+      }
+
+      const shuffled = pool.sort(()=>Math.random()-0.5);
+
+      activeGameState = {
+        type: "occipital",
+        regionKey: "occipital",
+        target,
+        targets: targetCount,
+        clickedIndices: new Set(),
+        board: shuffled
+      };
+
+      renderGameLayout(
+        "후두엽 게임 · 같은 모양 찾기",
+        `"${target}" 모양을 모두 찾아 눌러보세요.`,
+        `
+          <div class="center-box">
+            <div class="big-word" style="font-size:40px;">찾을 모양: ${target}</div>
+            <div class="visual-grid" id="occipitalGrid">
+              ${shuffled.map((shape, idx)=>`
+                <button type="button" class="visual-card" data-idx="${idx}">${shape}</button>
+              `).join("")}
+            </div>
+            <button type="button" class="btn strong" id="occipitalDoneBtn">확인</button>
+          </div>
+        `
+      );
+
+      document.querySelectorAll("#occipitalGrid .visual-card").forEach(btn=>{
+        btn.addEventListener("click", ()=>{
+          const idx = Number(btn.dataset.idx);
+          if(activeGameState.clickedIndices.has(idx)){
+            activeGameState.clickedIndices.delete(idx);
+            btn.classList.remove("selected");
+          }else{
+            activeGameState.clickedIndices.add(idx);
+            btn.classList.add("selected");
+          }
+        });
+      });
+
+      document.getElementById("occipitalDoneBtn").addEventListener("click", ()=>{
+        const correctIndices = [];
+        activeGameState.board.forEach((shape, idx)=>{
+          if(shape === activeGameState.target){
+            correctIndices.push(idx);
+          }
+        });
+
+        let correct = true;
+        if(correctIndices.length !== activeGameState.clickedIndices.size){
+          correct = false;
+        }
+        for(const idx of correctIndices){
+          if(!activeGameState.clickedIndices.has(idx)){
+            correct = false;
+            break;
+          }
+        }
+
+        registerAttempt("occipital", correct, true);
+        const score = correct ? activeGameState.targets * 10 : 0;
+        finishGame("occipital", score);
+
+        renderGameLayout(
+          "후두엽 게임 · 결과",
+          correct ? "모양을 잘 찾았어요." : "다음에는 같은 모양을 더 자세히 살펴보세요.",
+          `
+            <div class="center-box">
+              <div class="big-word">${correct ? "정답!" : "오답"}</div>
+              <div class="subline">찾아야 했던 모양: ${activeGameState.target}</div>
+              <button class="btn strong" id="retryOccipitalBtn">다시하기</button>
+            </div>
+          `
+        );
+        document.getElementById("retryOccipitalBtn").addEventListener("click", startSelectedGame);
+      });
+    }
+
+    function renderCerebellumGame(difficulty, hardLevel){
+      registerPlay("cerebellum");
+      saveStats();
+      renderStats();
+
+      const waitMin = difficulty === "easy" ? 1200 : 1000;
+      const waitMax = difficulty === "easy" ? 2600 : Math.max(1300, 2600 - hardLevel * 80);
+      const waitMs = Math.floor(Math.random() * (waitMax - waitMin + 1)) + waitMin;
+
+      activeGameState = {
+        type: "cerebellum",
+        regionKey: "cerebellum",
+        ready: false,
+        startedAt: null,
+        clickedTooSoon: false
+      };
+
+      renderGameLayout(
+        "소뇌 게임 · 반응속도",
+        "기다리다가 화면이 바뀌면 바로 누르세요.",
+        `
+          <div class="center-box">
+            <div class="reaction-box" id="reactionBox">준비... 기다려주세요</div>
+          </div>
+        `
+      );
+
+      const reactionBox = document.getElementById("reactionBox");
+
+      reactionBox.addEventListener("click", ()=>{
+        if(!activeGameState || activeGameState.type !== "cerebellum") return;
+
+        if(!activeGameState.ready){
+          activeGameState.clickedTooSoon = true;
+          registerAttempt("cerebellum", false, true);
+          finishGame("cerebellum", 0);
+          renderGameLayout(
+            "소뇌 게임 · 결과",
+            "너무 빨리 눌렀어요.",
+            `
+              <div class="center-box">
+                <div class="big-word">조금 빨랐어요</div>
+                <button class="btn strong" id="retryCerebellumBtn">다시하기</button>
+              </div>
+            `
+          );
+          document.getElementById("retryCerebellumBtn").addEventListener("click", startSelectedGame);
+          return;
+        }
+
+        const ms = Date.now() - activeGameState.startedAt;
+        registerAttempt("cerebellum", true, true);
+        registerReaction("cerebellum", ms);
+
+        let score = 0;
+        if(ms <= 250) score = 30;
+        else if(ms <= 400) score = 20;
+        else if(ms <= 650) score = 10;
+        else score = 5;
+
+        finishGame("cerebellum", score);
+
+        renderGameLayout(
+          "소뇌 게임 · 결과",
+          "반응속도를 기록했어요.",
+          `
+            <div class="center-box">
+              <div class="big-word">${ms}ms</div>
+              <div class="subline">이번 점수: ${score}</div>
+              <button class="btn strong" id="retryCerebellumBtn">다시하기</button>
+            </div>
+          `
+        );
+        document.getElementById("retryCerebellumBtn").addEventListener("click", startSelectedGame);
+      });
+
+      setTimeout(()=>{
+        if(!activeGameState || activeGameState.type !== "cerebellum") return;
+        if(activeGameState.clickedTooSoon) return;
+        activeGameState.ready = true;
+        activeGameState.startedAt = Date.now();
+        reactionBox.textContent = "지금 클릭!";
+        reactionBox.style.background = "#e7f7ee";
+        reactionBox.style.borderColor = "#b8e5ca";
+      }, waitMs);
+    }
+
+    function formatReaction(ms){
+      return ms === null || ms === undefined ? "-" : `${ms}ms`;
+    }
+
+    function calcAccuracy(correct, attempts){
+      if(!attempts) return "0%";
+      return `${Math.round((correct / attempts) * 100)}%`;
+    }
+
+    function renderStats(){
+      document.getElementById("totalPlaysValue").textContent = stats.totalPlays;
+      document.getElementById("bestScoreValue").textContent = stats.bestScore;
+      document.getElementById("accuracyValue").textContent = calcAccuracy(stats.totalCorrect, stats.totalAttempts);
+      document.getElementById("bestReactionValue").textContent = formatReaction(stats.bestReaction);
+
+      const detail = document.getElementById("detailStats");
+      detail.innerHTML = "";
+
+      Object.values(regions).forEach(region=>{
+        const rs = stats.regions[region.key];
+        const row = document.createElement("div");
+        row.className = "detail-row";
+        row.innerHTML = `
+          <div class="detail-row-head">
+            <span>${region.name}</span>
+            <span>${region.description}</span>
+          </div>
+          <div class="detail-meta">
+            <div>플레이 횟수<br><strong>${rs.plays}</strong></div>
+            <div>최고 점수<br><strong>${rs.bestScore}</strong></div>
+            <div>정답률<br><strong>${calcAccuracy(rs.correct, rs.attempts)}</strong></div>
+            <div>최고 반응속도<br><strong>${formatReaction(rs.bestReaction)}</strong></div>
+          </div>
+        `;
+        detail.appendChild(row);
+      });
+
+      renderQuickStatsModal();
+    }
+
+    function renderQuickStatsModal(){
+      const body = document.getElementById("quickStatsModalBody");
+      body.innerHTML = `
+        <div class="setting-item">전체 플레이: <strong>${stats.totalPlays}</strong></div>
+        <div class="setting-item">전체 최고 점수: <strong>${stats.bestScore}</strong></div>
+        <div class="setting-item">전체 정답률: <strong>${calcAccuracy(stats.totalCorrect, stats.totalAttempts)}</strong></div>
+        <div class="setting-item">최고 반응속도: <strong>${formatReaction(stats.bestReaction)}</strong></div>
+      `;
+    }
+
+    function openModal(id){
+      document.getElementById(id).classList.add("show");
+    }
+
+    function closeModal(id){
+      document.getElementById(id).classList.remove("show");
+    }
+
+    function syncSettingsUI(){
+      document.getElementById("soundToggle").value = settings.effectText;
+      document.getElementById("autoShowStats").value = settings.resultHint;
+    }
+
+    document.getElementById("startNowBtn").addEventListener("click", ()=>{
+      showScreen("main");
+    });
+
+    document.getElementById("statsNowBtn").addEventListener("click", ()=>{
+      showScreen("main");
+      openModal("statsModal");
+    });
+
+    document.getElementById("directMainBtn").addEventListener("click", ()=>{
+      showScreen("main");
+    });
+
+    document.getElementById("goHomeBtn").addEventListener("click", ()=>{
+      showScreen("start");
+    });
+
+    document.getElementById("openStatsBtn").addEventListener("click", ()=>{
+      openModal("statsModal");
+    });
+
+    document.getElementById("openSettingsBtn").addEventListener("click", ()=>{
+      openModal("settingsModal");
+    });
+
+    document.getElementById("closeSettingsBtn").addEventListener("click", ()=>{
+      closeModal("settingsModal");
+    });
+
+    document.getElementById("closeStatsBtn").addEventListener("click", ()=>{
+      closeModal("statsModal");
+    });
+
+    document.getElementById("resetStatsBtn").addEventListener("click", ()=>{
+      const ok = confirm("통계를 모두 초기화할까요?");
+      if(!ok) return;
+      stats = defaultStats();
+      saveStats();
+      renderStats();
+      showStatus("통계가 초기화되었습니다.");
+    });
+
+    difficultySelect.addEventListener("change", updateDifficultyUI);
+    hardLevelSelect.addEventListener("change", updateDifficultyUI);
+
+    document.getElementById("restartGameBtn").addEventListener("click", ()=>{
+      if(!selectedRegionKey){
+        showStatus("먼저 뇌 영역을 선택해주세요.");
+        return;
+      }
+      startSelectedGame();
+    });
+
+    document.getElementById("soundToggle").addEventListener("change", (e)=>{
+      settings.effectText = e.target.value;
+      saveSettings();
+    });
+
+    document.getElementById("autoShowStats").addEventListener("change", (e)=>{
+      settings.resultHint = e.target.value;
+      saveSettings();
+    });
+
+    document.getElementById("settingsModal").addEventListener("click", (e)=>{
+      if(e.target.id === "settingsModal") closeModal("settingsModal");
+    });
+
+    document.getElementById("statsModal").addEventListener("click", (e)=>{
+      if(e.target.id === "statsModal") closeModal("statsModal");
+    });
+
+    initRegions();
+    renderStats();
+    syncSettingsUI();
+    updateDifficultyUI();
+    clearRegionSelection();
+    </script>
+</body>
+
+</html>
