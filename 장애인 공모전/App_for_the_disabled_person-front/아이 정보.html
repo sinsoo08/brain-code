@@ -24,80 +24,96 @@
 
         * { box-sizing: border-box; }
 
-        body {
-    margin: 0;
-    font-family: 'Noto Sans KR', sans-serif;
-    background: linear-gradient(160deg, var(--blue-softest) 0%, #E8F4FF 100%);
-    min-height: 100vh;
-}
+        body{
+            margin: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: var(--blue-softest);
+            color: var(--text-dark);
+        }
 
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: var(--blue-dark);
-    padding: 14px 40px;
-    box-shadow: 0 2px 12px rgba(74,126,199,0.25);
-}
+        .info-container {
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: 20px;    /* 모서리를 둥글게 */
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05); /* 부드러운 그림자 */
+            width: 90%;
+            max-width: 400px;       /* 박스 최대 너비 */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;              /* 입력칸 사이 간격 */
+        }
 
-.nav-left {
-    display: flex; align-items: center; gap: 10px;
-    text-decoration: none;
-}
+        .info-container h2 {
+            font-family: 'Jua', sans-serif;
+            color: var(--text-dark);
+            margin: 0 0 10px 0;
+            text-align: center;
+        }
 
-.brain-logo { width: 44px; height: 44px; border-radius: 8px; }
-.logo-text { font-family: 'Jua', sans-serif; font-size: 22px; color: white; }
+        /* 입력칸 스타일 */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
 
-.menu { list-style: none; display: flex; gap: 24px; margin: 0; padding: 0; }
-.menu a {
-    color: rgba(255,255,255,0.9); text-decoration: none;
-    font-size: 15px; font-weight: 500;
-    padding: 6px 14px; border-radius: 20px; transition: background 0.2s;
-}
-.menu a:hover { background: rgba(255,255,255,0.2); }
+        .input-group label {
+            font-size: 14px;
+            color: var(--text-mid);
+            font-weight: 500;
+        }
 
-.container {
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 40px 20px 60px;
-    text-align: center;
-}
+        .input-group input {
+            padding: 12px;
+            border: 1px solid var(--blue-light);
+            border-radius: 10px;    /* 입력칸도 둥글게 */
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
 
-h1 {
-    font-family: 'Jua', sans-serif;
-    font-size: 36px;
-    color: var(--text-dark);
-    margin: 0 0 8px;
-}
+        .input-group input:focus {
+            border-color: var(--blue-dark); /* 클릭 시 강조 색상 */
+        }
 
-.subtitle {
-    font-size: 15px;
-    color: var(--text-mid);
-    margin-bottom: 36px;
-}
-
-#menu-screen { display: block; }
-#gameArea { display: none; }
-
-.menu-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-}
+        .main-content {
+            display: flex;
+            justify-content: center; /* 가로 중앙 */
+            align-items: center;     /* 세로 중앙 */
+            
+            min-height: calc(100vh - 80px); /* 72px는 네비바의 대략적인 높이입니다 */
+        }
     </style>
 
 </head>
 <body>
-    <nav class="navbar">
-        <a href="메인_페이지.html" class="nav-left">
-            <img src="img/뇌-파랑.png" class="brain-logo" alt="로고">
-            <span class="logo-text">브레인 코드</span>
-        </a>
-        <ul class="menu">
-            <li><a href="로그인_페이지.html">로그인</a></li>
-            <li><a href="회원가입_페이지.html">회원가입</a></li>
-        </ul>
-    </nav>
+    <main class="main-content">
+        <div class="info-container">
+        <h2>정보 입력</h2>
+        
+        <div class="input-group">
+            <label for="user-name">아이의 이름은?</label>
+            <input type="text" id="user-name" placeholder="이름을 입력하세요">
+        </div>
+
+        <div class="input-group">
+            <label for="birth-year">아이의 태어난 년도는?</label>
+            <input type="number" id="birth-year" placeholder="예: 2015">
+        </div>
+
+        <div class="input-group">
+            <label for="birth-date">아이가 태어난 월 일은?</label>
+            <input type="text" id="birth-date" placeholder="예: 0520">
+        </div>
+    </main>
+
+    <div class="avatar-list">
+        <img src="강아지.png" class="avatar" />
+        <img src="고양이.png" class="avatar" />
+        <img src="우파루파.png" class="avatar" />
+        <img src="라쿤.png" class="avatar" />
+        <img src="곰.png" class="avatar" />
+    </div>
+</div>
 </body>
 </html>
