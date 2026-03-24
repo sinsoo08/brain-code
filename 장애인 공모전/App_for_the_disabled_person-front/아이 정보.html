@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이 정보 - 브레인코드</title>
+    <link rel="icon" href="img/뇌-파랑.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --blue-dark:    #4A7EC7;
+            --blue-mid:     #6B9FD4;
+            --blue-light:   #A8C8E8;
+            --blue-pale:    #D6E8F7;
+            --blue-softest: #EEF5FC;
+            --white:        #FFFFFF;
+            --text-dark:    #2B4A6F;
+            --text-mid:     #4A6F96;
+            --text-light:   #7A9DBF;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+    margin: 0;
+    font-family: 'Noto Sans KR', sans-serif;
+    background: linear-gradient(160deg, var(--blue-softest) 0%, #E8F4FF 100%);
+    min-height: 100vh;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--blue-dark);
+    padding: 14px 40px;
+    box-shadow: 0 2px 12px rgba(74,126,199,0.25);
+}
+
+.nav-left {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none;
+}
+
+.brain-logo { width: 44px; height: 44px; border-radius: 8px; }
+.logo-text { font-family: 'Jua', sans-serif; font-size: 22px; color: white; }
+
+.menu { list-style: none; display: flex; gap: 24px; margin: 0; padding: 0; }
+.menu a {
+    color: rgba(255,255,255,0.9); text-decoration: none;
+    font-size: 15px; font-weight: 500;
+    padding: 6px 14px; border-radius: 20px; transition: background 0.2s;
+}
+.menu a:hover { background: rgba(255,255,255,0.2); }
+
+.container {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 40px 20px 60px;
+    text-align: center;
+}
+
+h1 {
+    font-family: 'Jua', sans-serif;
+    font-size: 36px;
+    color: var(--text-dark);
+    margin: 0 0 8px;
+}
+
+.subtitle {
+    font-size: 15px;
+    color: var(--text-mid);
+    margin-bottom: 36px;
+}
+
+#menu-screen { display: block; }
+#gameArea { display: none; }
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+    </style>
+
+</head>
+<body>
+    <nav class="navbar">
+        <a href="메인_페이지.html" class="nav-left">
+            <img src="img/뇌-파랑.png" class="brain-logo" alt="로고">
+            <span class="logo-text">브레인 코드</span>
+        </a>
+        <ul class="menu">
+            <li><a href="로그인_페이지.html">로그인</a></li>
+            <li><a href="회원가입_페이지.html">회원가입</a></li>
+        </ul>
+    </nav>
+</body>
+</html>
