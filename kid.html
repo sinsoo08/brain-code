@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이 정보 - 브레인코드</title>
+    <link rel="icon" href="img/brain-blue.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --blue-dark:    #4A7EC7;
+            --blue-mid:     #6B9FD4;
+            --blue-light:   #A8C8E8;
+            --blue-pale:    #D6E8F7;
+            --blue-softest: #EEF5FC;
+            --white:        #FFFFFF;
+            --text-dark:    #2B4A6F;
+            --text-mid:     #4A6F96;
+            --text-light:   #7A9DBF;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(160deg, var(--blue-dark) 0%, var(--blue-mid) 50%, var(--blue-pale) 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        /* ── 카드: overflow:hidden 제거 → 모서리 흰 선 원인이었음 ── */
+        .form-card {
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow: 0 16px 48px rgba(30, 70, 130, 0.28);
+            width: 100%;
+            max-width: 460px;
+        }
+
+        /* 헤더에 상단 radius 명시 → 카드와 정확히 일치 */
+        .card-header {
+            background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid));
+            padding: 28px 32px 24px;
+            text-align: center;
+            border-radius: 24px 24px 0 0;
+        }
+
+        .card-header h2 {
+            font-family: 'Jua', sans-serif;
+            font-size: 22px;
+            color: white;
+            font-weight: 400;
+            margin-bottom: 4px;
+        }
+
+        .card-header p {
+            font-size: 13px;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .form-section {
+            padding: 28px 32px 20px;
+        }
+
+        .form-section + .form-section {
+            border-top: 1.5px solid var(--blue-softest);
+            padding-top: 24px;
+        }
+
+        .section-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Jua', sans-serif;
+            font-size: 16px;
+            color: var(--blue-dark);
+            margin-bottom: 16px;
+        }
+
+        .section-label .icon {
+            width: 30px; height: 30px;
+            background: var(--blue-pale);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-bottom: 14px;
+        }
+
+        .input-group:last-child { margin-bottom: 0; }
+
+        .input-group label {
+            font-size: 12px;
+            color: var(--text-mid);
+            font-weight: 500;
+            letter-spacing: 0.02em;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--blue-light);
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: 'Noto Sans KR', sans-serif;
+            color: var(--text-dark);
+            outline: none;
+            background: var(--blue-softest);
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+
+        .input-group input::placeholder { color: var(--text-light); font-size: 13px; }
+
+        .input-group input:focus {
+            border-color: var(--blue-dark);
+            background: var(--white);
+            box-shadow: 0 0 0 3px rgba(74,126,199,0.12);
+        }
+
+        /* ── 아바타 ── */
+        .avatar-section {
+            padding: 0 32px 24px;
+        }
+
+        .avatar-grid {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .avatar-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .avatar-img-wrap {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 16px;
+            background: var(--blue-softest);
+            border: 2.5px solid var(--blue-pale);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            overflow: hidden;
+        }
+
+        .avatar-item:hover .avatar-img-wrap {
+            border-color: var(--blue-mid);
+            background: var(--blue-pale);
+            transform: translateY(-2px);
+        }
+
+        .avatar-item.selected .avatar-img-wrap {
+            border-color: var(--blue-dark);
+            background: var(--blue-pale);
+            box-shadow: 0 0 0 3px rgba(74,126,199,0.2);
+        }
+
+        .avatar-item.selected .avatar-name {
+            color: var(--blue-dark);
+            font-weight: 700;
+        }
+
+        .avatar-img-wrap img {
+            width: 75%;
+            height: 75%;
+            object-fit: contain;
+        }
+
+        .avatar-emoji { font-size: 28px; line-height: 1; }
+
+        .avatar-name {
+            font-size: 11px;
+            color: var(--text-mid);
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* ── 버튼 ── */
+        .form-footer {
+            padding: 0 32px 32px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid));
+            color: white;
+            font-family: 'Jua', sans-serif;
+            font-size: 18px;
+            padding: 15px;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(74,126,199,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            letter-spacing: 0.03em;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(74,126,199,0.4);
+        }
+
+        .submit-btn:active { transform: translateY(0); }
+
+        /* ────────────────────────────
+           반응형
+        ──────────────────────────── */
+
+        /* 태블릿 (768px 이하) */
+        @media (max-width: 768px) {
+            body { padding: 20px; align-items: flex-start; padding-top: 40px; }
+            .form-card { max-width: 100%; }
+            .card-header { padding: 24px 28px 20px; }
+            .card-header h2 { font-size: 20px; }
+            .form-section { padding: 24px 28px 18px; }
+            .avatar-section { padding: 0 28px 22px; }
+            .form-footer { padding: 0 28px 28px; }
+        }
+
+        /* 모바일 (480px 이하) */
+        @media (max-width: 480px) {
+            body { padding: 12px; padding-top: 20px; }
+            .card-header { padding: 20px 18px 16px; border-radius: 20px 20px 0 0; }
+            .card-header h2 { font-size: 18px; }
+            .card-header p { font-size: 12px; }
+            .form-card { border-radius: 20px; }
+            .form-section { padding: 20px 18px 14px; }
+            .section-label { font-size: 14px; }
+            .input-group input { font-size: 14px; padding: 11px 12px; }
+            .avatar-section { padding: 0 18px 18px; }
+            .avatar-grid { gap: 6px; }
+            .avatar-name { font-size: 10px; }
+            .form-footer { padding: 0 18px 20px; }
+            .submit-btn { font-size: 16px; padding: 14px; }
+        }
+
+        /* 아주 작은 화면 (360px 이하) */
+        @media (max-width: 360px) {
+            body { padding: 8px; padding-top: 12px; }
+            .avatar-grid { gap: 4px; }
+            .avatar-name { font-size: 9px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="form-card">
+
+        <div class="card-header">
+            <h2>아이 정보 입력</h2>
+            <p>입력한 정보로 맞춤 학습을 시작해요</p>
+        </div>
+
+        <div class="form-section">
+            <div class="section-label">
+                <div class="icon">📝</div>
+                기본 정보
+            </div>
+
+            <div class="input-group">
+                <label for="user-name">아이의 이름</label>
+                <input type="text" id="user-name" placeholder="이름을 입력하세요">
+            </div>
+
+            <div class="input-group">
+                <label for="birth-year">태어난 년도</label>
+                <input type="number" id="birth-year" placeholder="예: 2000">
+            </div>
+
+            <div class="input-group">
+                <label for="birth-date">태어난 월/일</label>
+                <input type="text" id="birth-date" placeholder="예: 0520">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-label">
+                <div class="icon">🐾</div>
+                캐릭터 선택
+            </div>
+        </div>
+
+        <div class="avatar-section">
+            <div class="avatar-grid">
+                <div class="avatar-item" data-src="img/dog.png">
+                    <div class="avatar-img-wrap">
+                        <img src="img/dog.png" alt="강아지" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                        <span class="avatar-emoji" style="display:none">🐶</span>
+                    </div>
+                    <span class="avatar-name">강아지</span>
+                </div>
+                <div class="avatar-item" data-src="img/cat.png">
+                    <div class="avatar-img-wrap">
+                        <img src="img/cat.png" alt="고양이" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                        <span class="avatar-emoji" style="display:none">🐱</span>
+                    </div>
+                    <span class="avatar-name">고양이</span>
+                </div>
+                <div class="avatar-item" data-src="img/axolotl.png">
+                    <div class="avatar-img-wrap">
+                        <img src="img/axolotl.png" alt="우파루파" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                        <span class="avatar-emoji" style="display:none">🦎</span>
+                    </div>
+                    <span class="avatar-name">우파루파</span>
+                </div>
+                <div class="avatar-item" data-src="img/raccoon.png">
+                    <div class="avatar-img-wrap">
+                        <img src="img/raccoon.png" alt="라쿤" onerror="handleOnError(this)">
+                        <span class="avatar-emoji" style="display:none">🦝</span>
+                    </div>
+                    <span class="avatar-name">라쿤</span>
+                </div>
+                <div class="avatar-item" data-src="img/bear.png">
+                    <div class="avatar-img-wrap">
+                        <img src="img/bear.png" alt="곰" onerror="handleOnError(this)">
+                        <span class="avatar-emoji" style="display:none">🐻</span>
+                    </div>
+                    <span class="avatar-name">곰</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-footer">
+            <button class="submit-btn" onclick="handleSubmit()">
+                프로필 시작하기 →
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+
+        const handleOnError = (element) => {
+            element.style.display = 'none';
+            element.nextElementSibling.style.display = 'block';
+        }
+
+        let selectedAvatar = null;
+
+        document.querySelectorAll('.avatar-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.avatar-item').forEach(a => a.classList.remove('selected'));
+                item.classList.add('selected');
+                selectedAvatar = item.dataset.src;
+            });
+        });
+
+        function handleSubmit() {
+            const name = document.getElementById('user-name').value.trim();
+            const year = document.getElementById('birth-year').value.trim();
+            const date = document.getElementById('birth-date').value.trim();
+
+            if (!name) { alert('아이의 이름을 입력해 주세요.'); document.getElementById('user-name').focus(); return; }
+            if (!year) { alert('태어난 년도를 입력해 주세요.'); document.getElementById('birth-year').focus(); return; }
+            if (!date) { alert('태어난 월/일을 입력해 주세요.'); document.getElementById('birth-date').focus(); return; }
+            if (!selectedAvatar) { alert('캐릭터를 선택해 주세요.'); return; }
+
+            fetch('/save-avatar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, birthYear: year, birthDate: date, avatar: selectedAvatar })
+            }).catch(() => {});
+
+            location.href = 'profile.html';
+        }
+    </script>
+
+</body>
+</html>

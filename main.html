@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>브레인 코드</title>
+    <link rel="icon" href="img/뇌-파랑.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav class="navbar">
+        <a href="main.html" class="nav-left">
+            <img src="img/brain-blue.png" class="brain-logo" alt="로고">
+            <span class="logo-text">브레인 코드</span>
+        </a>
+        <ul class="menu">
+            <li><a href="login.html">로그인</a></li>
+            <li><a href="signup.html">회원가입</a></li>
+        </ul>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-badge">발달장애 아동을 위한 학습 플랫폼</div>
+        <h1>발달장애 아동을 위한<br>인지 훈련 게임 플랫폼</h1>
+        <p>아이의 인지능력과 소통능력을 키워요!<br>다양한 게임으로 즐겁게 학습해요!</p>
+        <button class="hero-btn" onclick="location.href='login.html'">
+            지금 무료로 시작하기 →
+        </button>
+    </section>
+
+    <!-- PROBLEM CARDS -->
+    <section class="section">
+        <h2 class="section-title">이런 어려움을 함께 해결해요</h2>
+        <div class="cards-grid">
+            <div class="card">
+                <div class="card-icon">💬</div>
+                <h3>의사소통 어려움</h3>
+                <p>말 이해와 표현 능력 저하로 인한 소통의 어려움</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">📚</div>
+                <h3>기초학습 어려움</h3>
+                <p>놀이 학습 집중력 부족으로 인한 학습 어려움</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">👨‍👩‍👧</div>
+                <h3>부모님의 부담</h3>
+                <p>일상적인 학습 지도에서 오는 심리적·시간적 부담</p>
+            </div>
+            <div class="card">
+                <div class="card-icon">✨</div>
+                <h3>동기 부족</h3>
+                <p>학습에 흥미를 느끼기 어려워 지속이 힘든 상황</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- PHONE + FEATURES -->
+    <section class="phone-section">
+        <h2 class="section-title">발달장애 아동의 학습을 돕기 위해 만들었어요!</h2>
+        <div class="phone-wrap">
+            <div class="phone-frame">
+                <img id="screen" src="img/phone.png" alt="앱 화면" />
+                <button class="slide-btn prev" onclick="prevSlide()">←</button>
+                <button class="slide-btn next" onclick="nextSlide()">→</button>
+            </div>
+
+            <div class="feature-list">
+                <h3>부모 연동 기능</h3>
+                <hr class="feature-divider">
+                <div class="feature-item">
+                    <img src="img/check.png" alt="체크">
+                    <span>학습 진행 현황 확인</span>
+                </div>
+                <div class="feature-item">
+                    <img src="img/check.png" alt="체크">
+                    <span>아이의 점수 확인</span>
+                </div>
+                <div class="feature-item">
+                    <img src="img/check.png" alt="체크">
+                    <span>변화 기록 확인</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="cta-banner">
+            <p>발달장애 아동의 두뇌 발달 게임으로<br>아이학습 오늘부터 시작해 보세요!</p>
+            <button class="cta-btn" onclick="location.href='login.html'">
+                지금 시작하기 →
+            </button>
+        </div>
+    </section>
+
+    <footer>© 2026 브레인 코드. 발달장애 아동을 위한 인지 훈련 플랫폼.</footer>
+
+    <script>
+        const images = ["img/핸드폰.png"];
+        let current = 0;
+        function showSlide() {
+            const screen = document.getElementById("screen");
+            screen.style.opacity = 0;
+            setTimeout(() => { screen.src = images[current]; screen.style.opacity = 1; }, 150);
+        }
+        function nextSlide() { current = (current + 1) % images.length; showSlide(); }
+        function prevSlide() { current = (current - 1 + images.length) % images.length; showSlide(); }
+        document.getElementById("screen").style.transition = "opacity 0.3s ease";
+    </script>
+</body>
+</html>
