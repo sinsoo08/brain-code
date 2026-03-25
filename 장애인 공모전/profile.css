@@ -276,12 +276,14 @@ body {
     cursor: pointer;
     transition: all 0.18s;
     white-space: nowrap;
+    font-weight: 100;
 }
 
 .seg-btn.active {
     background: var(--blue-dark);
     color: white;
     box-shadow: 0 2px 8px rgba(74,126,199,0.3);
+    font-weight: 500;
 }
 
 /* ── 슬라이더 ── */
