@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BRAIN code · 시작</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700;900&display=swap" rel="stylesheet" />
+    <style>
+        /* 밝은 파란색 계열 테마 */
+        
+         :root {
+            --bg: #E3F2FD;
+            --surface: #FFFFFF;
+            --card: #F8FBFF;
+            --line: rgba(79, 163, 227, 0.15);
+            --accent: #1E88E5;
+            --accent2: #1565C0;
+            --text: #1A237E;
+            --sub: #5C6BC0;
+            /* [수정] 버튼 배경색을 훨씬 밝은 스카이 블루로 변경 */
+            --btn-l: #7fdbff;
+            --btn-r: #39cccc;
+            --radius: 18px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: "Noto Sans KR", sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: var(--text);
+        }
+        
+        .card {
+            width: min(420px, 92vw);
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 28px;
+            padding: 36px 32px 32px;
+            /* 원본 그림자 설정 유지 */
+            box-shadow: 0 10px 30px rgba(79, 163, 227, 0.1), 0 20px 60px rgba(0, 0, 0, 0.05);
+            animation: slideUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.97);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .profile-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+        
+        .avatar {
+            flex-shrink: 0;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+            border: 2px solid var(--accent);
+            display: grid;
+            place-items: center;
+            font-size: 30px;
+        }
+        
+        .profile-name {
+            font-size: 22px;
+            font-weight: 900;
+        }
+        
+        .profile-divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(to right, var(--accent), transparent);
+            margin: 7px 0;
+            opacity: 0.3;
+        }
+        
+        .welcome-box {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            padding: 28px 24px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .welcome-title {
+            font-size: 32px;
+            font-weight: 900;
+            line-height: 1.25;
+            margin-bottom: 10px;
+        }
+        
+        .welcome-title span {
+            color: var(--accent);
+        }
+        
+        .btn-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+        }
+        /* [수정] 버튼 크기와 그림자는 유지, 배경 색상만 아주 밝게 변경 */
+        
+        .btn-start {
+            background: linear-gradient(135deg, var(--btn-l), var(--btn-r));
+            border: none;
+            border-radius: var(--radius);
+            color: #FFFFFF;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            padding: 18px 24px;
+            cursor: pointer;
+            transition: all 0.22s ease;
+            position: relative;
+            text-align: left;
+            /* 원본 버튼 그림자 스타일 유지 */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-start:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+        
+        .btn-start-sub {
+            font-size: 11px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 4px;
+        }
+        
+        .btn-start-main {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-stats {
+            background: #FFFFFF;
+            border: 1px solid var(--line);
+            border-radius: var(--radius);
+            color: var(--sub);
+            padding: 18px 16px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        
+        .editable {
+            background: none;
+            border: none;
+            outline: none;
+            color: inherit;
+            font: inherit;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="profile-row">
+            <div class="avatar">🧠</div>
+            <div class="profile-info">
+                <div class="profile-name">
+                    <input class="editable" id="nameInput" value="이름을 입력하세요" onfocus="if(this.value==='이름을 입력하세요')this.value=''" onblur="if(!this.value)this.value='이름을 입력하세요'" />
+                </div>
+                <div class="profile-divider"></div>
+                <div class="profile-meta">
+                    <input class="editable" id="birthInput" value="생년월일 · 예) 2010.03.15" onfocus="if(this.value.includes('생년월일'))this.value=''" onblur="if(!this.value)this.value='생년월일 · 예) 2010.03.15'" />
+                </div>
+            </div>
+        </div>
+
+        <div class="welcome-box">
+            <div class="welcome-label" style="font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 2.5px; margin-bottom: 14px;">Brain Training</div>
+            <div class="welcome-title">오늘도<br><span>훈련</span> 시작해볼까요?</div>
+            <div class="welcome-desc" style="font-size: 13.5px; color: var(--sub); line-height: 1.75;">뇌 영역을 선택하고 나만의 속도로 게임을 즐겨보세요.</div>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn-start" onclick="handleStart()">
+                <div class="btn-start-sub">클릭해서 시작</div>
+                <div class="btn-start-main">게임 시작 →</div>
+            </button>
+            <button class="btn-stats" onclick="handleStats()">
+                <span style="font-size: 18px;">📊</span>통계 보기
+            </button>
+        </div>
+        <div class="footer-sig" style="text-align: center; margin-top: 22px; font-size: 11px; color: rgba(92, 107, 192, 0.5); letter-spacing: 1.5px;">BRAIN CODE · 뇌 기능 훈련</div>
+    </div>
+
+    <script>
+        function handleStart() {
+            const name = document.getElementById("nameInput").value;
+            if (name === "이름을 입력하세요" || !name.trim()) {
+                document.getElementById("nameInput").focus();
+                return;
+            }
+            localStorage.setItem('brain_user_name', name);
+            location.href = "1.html";
+        }
+
+        function handleStats() {
+            location.href = "1.html?showStats=true";
+        }
+    </script>
+</body>
+
+</html>
