@@ -10,11 +10,12 @@ export default function MainPage() {
       {/* NAV */}
       <nav className="navbar">
         <a href="/" className="nav-left">
+          <img src="/img/brain-blue.png" className="brain-logo" alt="로고" />
           <span className="logo-text">브레인 코드</span>
         </a>
         <ul className="menu">
-          <li><a onClick={() => router.push('/login')}>로그인</a></li>
-          <li><a onClick={() => router.push('/signup')}>회원가입</a></li>
+          <li><a href="/login" style={{cursor:'pointer'}}>로그인</a></li>
+          <li><a href="/signup" style={{cursor:'pointer'}}>회원가입</a></li>
         </ul>
       </nav>
 
@@ -51,6 +52,34 @@ export default function MainPage() {
             <div className="card-icon">✨</div>
             <h3>동기 부족</h3>
             <p>학습에 흥미를 느끼기 어려워 지속이 힘든 상황</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="phone-section">
+        <h2 className="section-title">발달장애 아동의 학습을 돕기 위해 만들었어요!</h2>
+        <div className="phone-wrap">
+          <div className="phone-frame">
+            <img id="screen" src="/img/phone.png" alt="앱 화면" />
+            <button className="slide-btn prev">←</button>
+            <button className="slide-btn next">→</button>
+          </div>
+
+          <div className="feature-list">
+            <h3>부모 연동 기능</h3>
+            <hr className="feature-divider" />
+            <div className="feature-item">
+              <img src="/img/check.png" alt="체크" />
+              <span>학습 진행 현황 확인</span>
+            </div>
+            <div className="feature-item">
+              <img src="/img/check.png" alt="체크" />
+              <span>아이의 점수 확인</span>
+            </div>
+            <div className="feature-item">
+              <img src="/img/check.png" alt="체크" />
+              <span>변화 기록 확인</span>
+            </div>
           </div>
         </div>
       </section>
