@@ -1,23 +1,22 @@
 :root {
-            --blue-dark:    #4A7EC7;
-            --blue-mid:     #6B9FD4;
-            --blue-light:   #A8C8E8;
-            --blue-pale:    #D6E8F7;
-            --blue-softest: #EEF5FC;
-            --white:        #FFFFFF;
-            --text-dark:    #2B4A6F;
-            --text-mid:     #4A6F96;
-            --text-light:   #7A9DBF;
-        }
+    --blue-dark:    #4A7EC7;
+    --blue-mid:     #6B9FD4;
+    --blue-light:   #A8C8E8;
+    --blue-pale:    #D6E8F7;
+    --blue-softest: #EEF5FC;
+    --white:        #FFFFFF;
+    --text-dark:    #2B4A6F;
+    --text-mid:     #4A6F96;
+    --text-light:   #7A9DBF;
+}
 
-        * { box-sizing: border-box; }
+* { box-sizing: border-box; }
 
-        body {
-            margin: 0;
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: var(--blue-softest);
-            color: var(--text-dark);
-        }
+body {
+    margin: 0;
+    background-color: var(--blue-softest);
+    color: var(--text-dark);
+}
 
         /* ── NAV ── */
         .navbar {
