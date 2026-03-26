@@ -4,6 +4,7 @@ import com.braincoder.dto.*;
 import com.braincoder.entity.GameSession;
 import com.braincoder.entity.SessionStatus;
 import com.braincoder.entity.User;
+
 import com.braincoder.exception.AppException;
 import com.braincoder.repository.GameSessionRepository;
 import com.braincoder.repository.UserRepository;
@@ -65,10 +66,7 @@ public class GameSessionService {
     @Transactional(readOnly = true)
     public StatsResponse getStats(Long userId) {
         List<GameSession> completed = sessionRepository
-                .findByUserOrderByStartedAtDesc(findUser(userId))
-                .stream()
-                .filter(s -> s.getStatus() == SessionStatus.COMPLETED)
-                .toList();
+                .findByUserAndStatusOrderByStartedAtDesc(findUser(userId), SessionStatus.COMPLETED);
 
         int totalScore = completed.stream()
                 .mapToInt(s -> s.getScore() != null ? s.getScore() : 0).sum();

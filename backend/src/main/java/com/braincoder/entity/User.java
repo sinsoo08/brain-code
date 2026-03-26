@@ -29,6 +29,12 @@ public class User {
 
     private String providerId;
 
+    // 아이 프로필
+    private String kidName;
+    private String kidBirthYear;
+    private String kidBirthDate;
+    private String avatar;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;

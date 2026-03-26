@@ -27,10 +27,14 @@ public class AuthService {
         if (userRepository.existsByEmail(req.getEmail()))
             throw new AppException(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다.");
 
+        String nickname = StringUtils.hasText(req.getNickname())
+                ? req.getNickname()
+                : req.getEmail().split("@")[0];
+
         User user = userRepository.save(User.builder()
                 .email(req.getEmail())
                 .password(passwordEncoder.encode(req.getPassword()))
-                .nickname(req.getNickname())
+                .nickname(nickname)
                 .provider(AuthProvider.LOCAL)
                 .build());
 

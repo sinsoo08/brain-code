@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,12 +22,14 @@ public class UserController {
     private final UserRepository userRepository;
 
     @GetMapping("/me")
+    @Transactional(readOnly = true)
     public ResponseEntity<UserResponse> getMe(@AuthenticationPrincipal UserPrincipal principal) {
         User user = findUser(principal.getId());
         return ResponseEntity.ok(new UserResponse(user.getId(), user.getEmail(), user.getNickname()));
     }
 
     @PutMapping("/me")
+    @Transactional
     public ResponseEntity<UserResponse> updateMe(@RequestBody @Valid UpdateProfileRequest request,
                                                   @AuthenticationPrincipal UserPrincipal principal) {
         User user = findUser(principal.getId());
