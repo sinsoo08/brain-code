@@ -1,6 +1,6 @@
 'use client'
 import { useRouter } from 'next/navigation'
-import '../kid.css'
+import '../kid.module.css'
 
 export default function KidPage() {
   const router = useRouter()
