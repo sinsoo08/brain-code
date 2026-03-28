@@ -3,149 +3,1309 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>통계창 - 브레인 코드</title>
-    <link rel="icon" href="img/뇌-파랑.png" type="image/png">
+    <title>통계 - 브레인 코드</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="progress.css">
+    <style>
+        :root {
+            --blue-dark:    #4A7EC7;
+            --blue-mid:     #6B9FD4;
+            --blue-light:   #A8C8E8;
+            --blue-pale:    #D6E8F7;
+            --blue-softest: #EEF5FC;
+            --white:        #FFFFFF;
+            --text-dark:    #2B4A6F;
+            --text-mid:     #4A6F96;
+            --text-light:   #7A9DBF;
+            --green:        #4CAF7D;
+            --green-pale:   #E8F7EF;
+            --orange:       #F0A044;
+            --orange-pale:  #FEF3E2;
+            --danger:       #E05555;
+            --danger-pale:  #FDEAEA;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--blue-softest);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        /* ── TOP BAR ── */
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--blue-dark);
+            padding: 14px 24px;
+            box-shadow: 0 2px 12px rgba(74,126,199,0.3);
+        }
+
+        .back-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.18);
+            border: none;
+            color: white;
+            font-family: 'Jua', sans-serif;
+            font-size: 15px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.18s;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.28); }
+
+        .topbar-title {
+            font-family: 'Jua', sans-serif;
+            font-size: 22px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .topbar-divider {
+            opacity: 0.45;
+            font-size: 18px;
+        }
+
+        .team-badge {
+            background: rgba(255,255,255,0.22);
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 50%;
+            width: 52px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .topbar-profile-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 130px;
+        }
+
+        .topbar-profile-name {
+            font-family: 'Jua', sans-serif;
+            font-size: 13px;
+            color: white;
+            line-height: 1.1;
+            border-bottom: 1.5px solid rgba(255,255,255,0.6);
+            padding-bottom: 3px;
+            width: 100%;
+        }
+
+        .topbar-profile-birth {
+            font-family: 'Jua', sans-serif;
+            font-size: 13px;
+            color: white;
+            line-height: 1.1;
+            border-bottom: 1.5px solid rgba(255,255,255,0.6);
+            padding-bottom: 3px;
+            width: 100%;
+        }
+
+        .settings-btn {
+            background: rgba(255,255,255,0.18);
+            border: none;
+            color: white;
+            font-family: 'Jua', sans-serif;
+            font-size: 15px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.18s;
+        }
+        .settings-btn:hover { background: rgba(255,255,255,0.28); }
+
+        /* ── LAYOUT ── */
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 60px);
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 130px;
+            flex-shrink: 0;
+            background: white;
+            border-right: 1.5px solid var(--blue-pale);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar-label {
+            font-family: 'Jua', sans-serif;
+            font-size: 11px;
+            color: var(--text-light);
+            padding: 0 16px 8px;
+            letter-spacing: 0.04em;
+        }
+
+        .sidebar-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 10px;
+            margin: 0 8px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.18s;
+            border: 2px solid transparent;
+        }
+
+        .sidebar-item:hover {
+            background: var(--blue-softest);
+        }
+
+        .sidebar-item.active {
+            background: var(--blue-pale);
+            border-color: var(--blue-light);
+        }
+
+        .sidebar-icon { font-size: 24px; }
+
+        .sidebar-text {
+            font-family: 'Jua', sans-serif;
+            font-size: 12px;
+            color: var(--text-mid);
+            text-align: center;
+        }
+
+        .sidebar-item.active .sidebar-text { color: var(--blue-dark); }
+
+        /* wavy lines decoration */
+        .sidebar-waves {
+            padding: 8px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: 4px;
+        }
+
+        .wave-line {
+            height: 3px;
+            border-radius: 2px;
+            background: var(--blue-pale);
+        }
+        .wave-line:nth-child(1) { width: 70%; background: var(--blue-light); }
+        .wave-line:nth-child(2) { width: 90%; background: var(--blue-pale); }
+        .wave-line:nth-child(3) { width: 60%; background: var(--blue-light); opacity: 0.6; }
+
+        /* ── MAIN CONTENT ── */
+        .main {
+            flex: 1;
+            padding: 28px 28px 40px;
+            overflow-y: auto;
+        }
+
+        /* ── HERO BANNER ── */
+        .hero-banner {
+            background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-mid) 100%);
+            border-radius: 20px;
+            padding: 22px 28px;
+            color: white;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 6px 24px rgba(74,126,199,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            width: 200px; height: 200px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 50%;
+            top: -80px; right: -40px;
+        }
+
+        .hero-banner-left h2 {
+            font-family: 'Jua', sans-serif;
+            font-size: 22px;
+            font-weight: 400;
+            margin-bottom: 4px;
+        }
+
+        .hero-banner-left p {
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        .hero-streak {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255,255,255,0.18);
+            border-radius: 14px;
+            padding: 12px 20px;
+            flex-shrink: 0;
+        }
+
+        .streak-num {
+            font-family: 'Jua', sans-serif;
+            font-size: 28px;
+            line-height: 1;
+        }
+
+        .streak-label {
+            font-size: 11px;
+            opacity: 0.88;
+            white-space: nowrap;
+        }
+
+        /* ── SECTION TITLE ── */
+        .section-title {
+            font-family: 'Jua', sans-serif;
+            font-size: 16px;
+            color: var(--text-dark);
+            font-weight: 400;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1.5px;
+            background: var(--blue-pale);
+            border-radius: 1px;
+        }
+
+        /* ── TRAINING INFO ── */
+        .training-info {
+            background: white;
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1.5px solid var(--blue-pale);
+            box-shadow: 0 2px 10px rgba(74,126,199,0.07);
+        }
+
+        .training-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .training-icon {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .training-name {
+            font-family: 'Jua', sans-serif;
+            font-size: 17px;
+            color: var(--text-dark);
+            margin-bottom: 2px;
+        }
+
+        .training-desc {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .training-badge {
+            font-family: 'Jua', sans-serif;
+            font-size: 13px;
+            color: var(--blue-dark);
+            background: var(--blue-pale);
+            border-radius: 20px;
+            padding: 6px 16px;
+            flex-shrink: 0;
+        }
+
+        /* ── STATS GRID (top 3 cards) ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 18px;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border: 1.5px solid var(--blue-pale);
+            box-shadow: 0 2px 10px rgba(74,126,199,0.07);
+            transition: transform 0.18s, box-shadow 0.18s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(74,126,199,0.15);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            border-radius: 18px 18px 0 0;
+        }
+
+        .stat-card.blue::before  { background: linear-gradient(90deg, var(--blue-dark), var(--blue-mid)); }
+        .stat-card.green::before { background: linear-gradient(90deg, var(--green), #6DCFA0); }
+        .stat-card.orange::before{ background: linear-gradient(90deg, var(--orange), #F5C07A); }
+
+        .stat-tag {
+            font-family: 'Jua', sans-serif;
+            font-size: 11px;
+            border-radius: 8px;
+            padding: 3px 9px;
+            display: inline-block;
+            width: fit-content;
+        }
+
+        .stat-tag.blue   { background: var(--blue-softest); color: var(--blue-dark); }
+        .stat-tag.green  { background: var(--green-pale);   color: var(--green); }
+        .stat-tag.orange { background: var(--orange-pale);  color: var(--orange); }
+
+        .stat-value {
+            font-family: 'Jua', sans-serif;
+            font-size: 32px;
+            color: var(--text-dark);
+            line-height: 1;
+        }
+
+        .stat-value span {
+            font-size: 16px;
+            color: var(--text-light);
+            font-weight: 400;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        /* ── INSIGHT GRID (bottom 3 cards) ── */
+        .insight-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .insight-card {
+            background: white;
+            border-radius: 18px;
+            padding: 18px 16px;
+            border: 1.5px solid var(--blue-pale);
+            box-shadow: 0 2px 10px rgba(74,126,199,0.07);
+            transition: transform 0.18s, box-shadow 0.18s;
+        }
+
+        .insight-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(74,126,199,0.15);
+        }
+
+        .insight-tag {
+            font-family: 'Jua', sans-serif;
+            font-size: 11px;
+            border-radius: 8px;
+            padding: 3px 9px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .insight-tag.good    { background: var(--green-pale);   color: var(--green); }
+        .insight-tag.bad     { background: var(--danger-pale);  color: var(--danger); }
+        .insight-tag.compare { background: var(--blue-softest); color: var(--blue-dark); }
+
+        .insight-area {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .insight-name {
+            font-family: 'Jua', sans-serif;
+            font-size: 20px;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .insight-bar-wrap {
+            height: 6px;
+            background: var(--blue-softest);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .insight-bar {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s cubic-bezier(0.34, 1.4, 0.64, 1);
+        }
+
+        .insight-bar.good    { background: linear-gradient(90deg, var(--green), #6DCFA0); }
+        .insight-bar.bad     { background: linear-gradient(90deg, var(--danger), #E88080); }
+
+        .insight-desc {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        .compare-num {
+            font-family: 'Jua', sans-serif;
+            font-size: 26px;
+            color: var(--blue-dark);
+            margin: 4px 0;
+        }
+
+        .compare-sub {
+            font-size: 11px;
+            color: var(--text-light);
+        }
+
+        /* ── PROGRESS CHART ── */
+        .chart-card {
+            background: white;
+            border-radius: 18px;
+            padding: 20px 24px;
+            border: 1.5px solid var(--blue-pale);
+            box-shadow: 0 2px 10px rgba(74,126,199,0.07);
+            margin-bottom: 24px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .chart-title {
+            font-family: 'Jua', sans-serif;
+            font-size: 15px;
+            color: var(--text-dark);
+        }
+
+        .chart-legend {
+            display: flex;
+            gap: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            color: var(--text-light);
+        }
+
+        .legend-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+        }
+
+        .chart-area {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            height: 100px;
+        }
+
+        .bar-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .bar {
+            width: 100%;
+            border-radius: 6px 6px 0 0;
+            transition: height 0.8s cubic-bezier(0.34, 1.2, 0.64, 1);
+        }
+
+        .bar.this  { background: linear-gradient(180deg, var(--blue-dark), var(--blue-mid)); }
+        .bar.prev  { background: var(--blue-pale); }
+
+        .bar-label {
+            font-size: 10px;
+            color: var(--text-light);
+        }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-banner   { animation: fadeUp 0.3s ease 0.05s both; }
+        .training-info { animation: fadeUp 0.3s ease 0.1s  both; }
+        .stat-card:nth-child(1) { animation: fadeUp 0.3s ease 0.15s both; }
+        .stat-card:nth-child(2) { animation: fadeUp 0.3s ease 0.2s  both; }
+        .stat-card:nth-child(3) { animation: fadeUp 0.3s ease 0.25s both; }
+        .insight-card:nth-child(1) { animation: fadeUp 0.3s ease 0.3s  both; }
+        .insight-card:nth-child(2) { animation: fadeUp 0.3s ease 0.35s both; }
+        .insight-card:nth-child(3) { animation: fadeUp 0.3s ease 0.4s  both; }
+        .chart-card { animation: fadeUp 0.3s ease 0.45s both; }
+
+        /* ════════════════════════════
+           설정 모달
+        ════════════════════════════ */
+        .s-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(30, 60, 110, 0.45);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            padding: 20px;
+        }
+        .s-modal.open {
+            display: flex;
+            animation: overlayIn 0.22s ease;
+        }
+        @keyframes overlayIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        .s-modal-content {
+            background: var(--white);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(30, 70, 130, 0.3);
+            width: 100%;
+            max-width: 420px;
+            overflow: hidden;
+            animation: cardIn2 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
+        }
+        @keyframes cardIn2 {
+            from { transform: scale(0.88) translateY(16px); opacity: 0; }
+            to   { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .s-modal-header {
+            background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid));
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .s-modal-title {
+            font-family: 'Jua', sans-serif;
+            font-size: 20px;
+            color: white;
+            letter-spacing: 0.03em;
+        }
+        .s-close-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            width: 30px; height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.15s;
+        }
+        .s-close-btn:hover { background: rgba(255,255,255,0.35); }
+
+        /* 탭 바 */
+        .s-tab-bar {
+            display: flex;
+            background: var(--blue-softest);
+            border-bottom: 1.5px solid var(--blue-pale);
+            padding: 8px 16px 0;
+            gap: 4px;
+        }
+        .s-tab-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 8px 4px 10px;
+            background: none;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.18s;
+            border-radius: 8px 8px 0 0;
+        }
+        .s-tab-btn:hover { background: var(--blue-pale); }
+        .s-tab-btn.active {
+            border-bottom-color: var(--blue-dark);
+            background: var(--white);
+        }
+        .s-tab-icon { font-size: 20px; }
+        .s-tab-label {
+            font-family: 'Jua', sans-serif;
+            font-size: 13px;
+            color: var(--text-light);
+            transition: color 0.18s;
+        }
+        .s-tab-btn.active .s-tab-label { color: var(--blue-dark); }
+
+        /* 탭 패널 */
+        .s-tab-panel {
+            display: none;
+            flex-direction: column;
+            padding: 8px 0;
+            min-height: 220px;
+        }
+        .s-tab-panel.active { display: flex; }
+
+        /* 설정 행 */
+        .s-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 24px;
+            gap: 12px;
+            border-bottom: 1px solid var(--blue-softest);
+            transition: background 0.15s;
+        }
+        .s-row:last-child { border-bottom: none; }
+        .s-row:hover { background: var(--blue-softest); }
+        .s-row-col {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .s-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+            min-width: 0;
+        }
+        .s-label {
+            font-family: 'Jua', sans-serif;
+            font-size: 15px;
+            color: var(--text-dark);
+        }
+        .s-desc {
+            font-size: 11px;
+            color: var(--text-light);
+        }
+
+        /* 토글 */
+        .s-toggle { cursor: pointer; flex-shrink: 0; }
+        .s-toggle input { display: none; }
+        .s-track {
+            display: block;
+            width: 46px; height: 26px;
+            background: var(--blue-light);
+            border-radius: 13px;
+            position: relative;
+            transition: background 0.2s;
+        }
+        .s-toggle input:checked + .s-track { background: var(--blue-dark); }
+        .s-thumb {
+            position: absolute;
+            top: 3px; left: 3px;
+            width: 20px; height: 20px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            transition: transform 0.2s cubic-bezier(0.34, 1.5, 0.64, 1);
+        }
+        .s-toggle input:checked + .s-track .s-thumb { transform: translateX(20px); }
+
+        /* 세그먼트 */
+        .s-seg {
+            display: flex;
+            background: var(--blue-softest);
+            border-radius: 10px;
+            padding: 3px;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+        .s-seg-btn {
+            font-family: 'Jua', sans-serif;
+            font-size: 12px;
+            color: var(--text-mid);
+            background: none;
+            border: none;
+            border-radius: 8px;
+            padding: 5px 10px;
+            cursor: pointer;
+            transition: all 0.18s;
+            white-space: nowrap;
+        }
+        .s-seg-btn.active {
+            background: var(--blue-dark);
+            color: white;
+            box-shadow: 0 2px 8px rgba(74,126,199,0.3);
+        }
+
+        /* 슬라이더 */
+        .s-slider-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+        .s-slider-icon { font-size: 16px; }
+        .s-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--blue-pale);
+            outline: none;
+            cursor: pointer;
+        }
+        .s-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--blue-dark);
+            box-shadow: 0 2px 6px rgba(74,126,199,0.4);
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
+        .s-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+        /* 인풋 */
+        .s-input {
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 13px;
+            color: var(--text-dark);
+            background: var(--blue-softest);
+            border: 1.5px solid var(--blue-light);
+            border-radius: 10px;
+            padding: 7px 12px;
+            width: 130px;
+            outline: none;
+            transition: border-color 0.18s, box-shadow 0.18s;
+            flex-shrink: 0;
+        }
+        .s-input:focus {
+            border-color: var(--blue-dark);
+            box-shadow: 0 0 0 3px rgba(74,126,199,0.12);
+            background: var(--white);
+        }
+        .s-input::placeholder { color: var(--text-light); font-size: 12px; }
+
+        /* 링크 버튼 */
+        .s-link-btn {
+            font-family: 'Jua', sans-serif;
+            font-size: 13px;
+            color: var(--blue-dark);
+            background: var(--blue-pale);
+            border: none;
+            border-radius: 10px;
+            padding: 7px 14px;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.15s;
+            flex-shrink: 0;
+        }
+        .s-link-btn:hover { background: var(--blue-light); transform: translateX(2px); }
+
+        /* 위험 버튼 */
+        .s-danger-btn {
+            font-family: 'Jua', sans-serif;
+            font-size: 13px;
+            color: var(--danger);
+            background: var(--danger-pale);
+            border: none;
+            border-radius: 10px;
+            padding: 7px 14px;
+            cursor: pointer;
+            transition: background 0.15s;
+            flex-shrink: 0;
+        }
+        .s-danger-btn:hover { background: #f9d0d0; }
+
+        /* 푸터 */
+        .s-modal-footer {
+            padding: 16px 24px 20px;
+            border-top: 1.5px solid var(--blue-softest);
+        }
+        .s-save-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--blue-dark), var(--blue-mid));
+            color: white;
+            font-family: 'Jua', sans-serif;
+            font-size: 16px;
+            padding: 13px;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(74,126,199,0.3);
+            transition: transform 0.18s, box-shadow 0.18s;
+            letter-spacing: 0.03em;
+        }
+        .s-save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(74,126,199,0.4);
+        }
+        .s-save-btn:active { transform: translateY(0); }
+
+        @media (max-width: 480px) {
+            .s-modal { padding: 12px; align-items: flex-end; }
+            .s-modal-content { border-radius: 20px 20px 16px 16px; max-width: 100%; }
+            .s-row { padding: 12px 18px; }
+            .s-seg-btn { padding: 5px 8px; font-size: 11px; }
+            .s-input { width: 110px; }
+            .s-modal-footer { padding: 14px 18px 18px; }
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .sidebar { width: 72px; }
+            .sidebar-text { display: none; }
+            .sidebar-waves { display: none; }
+            .main { padding: 18px 16px 32px; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .insight-grid { grid-template-columns: 1fr; }
+            .stat-card:nth-child(3) { grid-column: span 2; }
+        }
+
+        @media (max-width: 480px) {
+            .topbar { padding: 10px 14px; }
+            .topbar-title { font-size: 15px; }
+            .sidebar { display: none; }
+            .stats-grid { grid-template-columns: 1fr 1fr; }
+            .stat-card:nth-child(3) { grid-column: span 2; }
+            .hero-banner { flex-direction: column; gap: 14px; align-items: flex-start; }
+        }
+    </style>
 </head>
 <body>
 
-    <!-- 페이지 내용 (예시) -->
-    <div class="page-bg">
-        <button class="open-btn" onclick="openModal()">⚙️ 설정</button>
+    <!-- TOP BAR -->
+    <div class="topbar">
+        <button class="back-btn" onclick="history.back()">← 돌아가기</button>
+        <div class="topbar-title">
+            우리
+            <span class="topbar-divider">|</span>
+            <span class="team-badge">프로필</span>
+            <span class="topbar-profile-info">
+                <span class="topbar-profile-name">이름</span>
+                <span class="topbar-profile-birth">생일</span>
+            </span>
+            <span class="topbar-divider">—</span>
+            의
+        </div>
+        <button class="settings-btn" onclick="openSettingsModal()">⚙️ 설정</button>
     </div>
 
-    <!-- 설정 모달 -->
-    <div id="modal" class="modal" onclick="handleBackdrop(event)">
-        <div class="modal-content">
+    <!-- LAYOUT -->
+    <div class="layout">
 
-            <!-- 헤더 -->
-            <div class="modal-header">
-                <span class="modal-title">설정</span>
-                <button class="close-btn" onclick="closeModal()">✕</button>
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-label">목록</div>
+            <div class="sidebar-item active" onclick="selectArea(this, '전두엽')">
+                <span class="sidebar-icon">🧠</span>
+                <span class="sidebar-text">전두엽</span>
+            </div>
+            <div class="sidebar-waves">
+                <div class="wave-line"></div>
+                <div class="wave-line"></div>
+                <div class="wave-line"></div>
+            </div>
+            <div class="sidebar-item" onclick="selectArea(this, '소뇌')">
+                <span class="sidebar-icon">⚡</span>
+                <span class="sidebar-text">소뇌</span>
+            </div>
+            <div class="sidebar-waves">
+                <div class="wave-line"></div>
+                <div class="wave-line"></div>
+                <div class="wave-line"></div>
+            </div>
+            <div class="sidebar-item" onclick="selectArea(this, '해마')">
+                <span class="sidebar-icon">🎯</span>
+                <span class="sidebar-text">해마</span>
+            </div>
+            <div class="sidebar-waves">
+                <div class="wave-line"></div>
+                <div class="wave-line"></div>
+                <div class="wave-line"></div>
+            </div>
+            <div class="sidebar-item" onclick="selectArea(this, '두정엽')">
+                <span class="sidebar-icon">🌟</span>
+                <span class="sidebar-text">두정엽</span>
+            </div>
+            <div class="sidebar-waves">
+                <div class="wave-line"></div>
+                <div class="wave-line"></div>
+                <div class="wave-line"></div>
+            </div>
+            <div class="sidebar-item" onclick="selectArea(this, '후두엽')">
+                <span class="sidebar-icon">👁️</span>
+                <span class="sidebar-text">후두엽</span>
+            </div>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="main">
+
+            <!-- HERO BANNER -->
+            <div class="hero-banner">
+                <div class="hero-banner-left">
+                    <h2 id="area-title">전두엽에서는 연속훈련 D+7</h2>
+                    <p>꾸준히 훈련 중이에요! 오늘도 화이팅 🎉</p>
+                </div>
+                <div class="hero-streak">
+                    <span class="streak-num">🔥 7</span>
+                    <span class="streak-label">연속 훈련일</span>
+                </div>
             </div>
 
-            <!-- 탭 -->
-            <div class="tab-bar">
-                <button class="tab-btn active" onclick="switchTab('game', this)">
-                    <span class="tab-icon">🎮</span>
-                    <span class="tab-label">게임</span>
+            <!-- STATS SECTION -->
+            <div class="section-title">📊 플레이 통계</div>
+
+            <!-- TRAINING INFO -->
+            <div class="training-info">
+                <div class="training-left">
+                    <div class="training-icon">🧠</div>
+                    <div>
+                        <div class="training-name" id="training-area">전두엽</div>
+                        <div class="training-desc">인지·집중 훈련 영역</div>
+                    </div>
+                </div>
+                <div class="training-badge" id="training-badge">연속훈련 D+7</div>
+            </div>
+
+            <!-- STAT CARDS -->
+            <div class="stats-grid">
+                <div class="stat-card blue">
+                    <span class="stat-tag blue">완료 플레이</span>
+                    <div class="stat-value" id="stat-complete">42<span>H</span></div>
+                    <div class="stat-label">총 완료 횟수</div>
+                </div>
+                <div class="stat-card green">
+                    <span class="stat-tag green">도전</span>
+                    <div class="stat-value" id="stat-challenge">18<span>H</span></div>
+                    <div class="stat-label">도전 시도 횟수</div>
+                </div>
+                <div class="stat-card orange">
+                    <span class="stat-tag orange">플레이</span>
+                    <div class="stat-value" id="stat-play">60<span>회</span></div>
+                    <div class="stat-label">전체 플레이 횟수</div>
+                </div>
+            </div>
+
+            <!-- INSIGHT SECTION -->
+            <div class="section-title">💡 인사이트</div>
+
+            <div class="insight-grid">
+                <!-- 잘하는 영역 -->
+                <div class="insight-card">
+                    <span class="insight-tag good">잘하는 영역</span>
+                    <div class="insight-area">강점 뇌 영역</div>
+                    <div class="insight-name" id="good-area">전두엽</div>
+                    <div class="insight-bar-wrap">
+                        <div class="insight-bar good" id="good-bar" style="width: 82%"></div>
+                    </div>
+                    <div class="insight-desc">정답률 <strong>82%</strong> · 최고 기록 🏆</div>
+                </div>
+
+                <!-- 부족한 영역 -->
+                <div class="insight-card">
+                    <span class="insight-tag bad">부족한 영역</span>
+                    <div class="insight-area">개선이 필요한 뇌 영역</div>
+                    <div class="insight-name" id="bad-area">소뇌</div>
+                    <div class="insight-bar-wrap">
+                        <div class="insight-bar bad" id="bad-bar" style="width: 38%"></div>
+                    </div>
+                    <div class="insight-desc">정답률 <strong>38%</strong> · 더 연습해봐요 💪</div>
+                </div>
+
+                <!-- 이번 vs 지번 비교 -->
+                <div class="insight-card">
+                    <span class="insight-tag compare">이번 vs 지번</span>
+                    <div class="insight-area">성장 비교</div>
+                    <div class="compare-num">약 1.5배</div>
+                    <div class="compare-sub">이번 주가 지난주보다 나아짐</div>
+                    <div class="insight-desc" style="margin-top: 10px;">
+                        지난주 <strong>40점</strong> → 이번주 <strong>60점</strong> 📈
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHART -->
+            <div class="section-title">📈 최근 7일 점수</div>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <span class="chart-title">일별 훈련 점수</span>
+                    <div class="chart-legend">
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background: var(--blue-dark)"></div>
+                            이번 주
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot" style="background: var(--blue-pale)"></div>
+                            지난 주
+                        </div>
+                    </div>
+                </div>
+                <div class="chart-area" id="chart-area">
+                    <!-- JS로 생성 -->
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ── 설정 모달 ── -->
+    <div id="modal" class="s-modal" onclick="handleBackdrop(event)">
+        <div class="s-modal-content">
+
+            <!-- 헤더 -->
+            <div class="s-modal-header">
+                <span class="s-modal-title">설정</span>
+                <button class="s-close-btn" onclick="closeModal()">✕</button>
+            </div>
+
+            <!-- 탭 바 -->
+            <div class="s-tab-bar">
+                <button class="s-tab-btn active" onclick="switchSettingTab('game', this)">
+                    <span class="s-tab-icon">🎮</span>
+                    <span class="s-tab-label">게임</span>
                 </button>
-                <button class="tab-btn" onclick="switchTab('sound', this)">
-                    <span class="tab-icon">🔊</span>
-                    <span class="tab-label">소리</span>
+                <button class="s-tab-btn" onclick="switchSettingTab('sound', this)">
+                    <span class="s-tab-icon">🔊</span>
+                    <span class="s-tab-label">소리</span>
                 </button>
-                <button class="tab-btn" onclick="switchTab('account', this)">
-                    <span class="tab-icon">👤</span>
-                    <span class="tab-label">계정</span>
+                <button class="s-tab-btn" onclick="switchSettingTab('account', this)">
+                    <span class="s-tab-icon">👤</span>
+                    <span class="s-tab-label">계정</span>
                 </button>
             </div>
 
             <!-- 탭 패널: 게임 -->
-            <div id="tab-game" class="tab-panel active">
-                <div class="setting-row">
-                    <div class="setting-info">
-                        <span class="setting-label">난이도</span>
-                        <span class="setting-desc">문제의 어려움을 조절해요</span>
+            <div id="stab-game" class="s-tab-panel active">
+                <div class="s-row">
+                    <div class="s-info">
+                        <span class="s-label">난이도</span>
+                        <span class="s-desc">문제의 어려움을 조절해요</span>
                     </div>
-                    <div class="seg-control">
-                        <button class="seg-btn active" onclick="selectSeg(this)">쉬움</button>
-                        <button class="seg-btn" onclick="selectSeg(this)">보통</button>
-                        <button class="seg-btn" onclick="selectSeg(this)">어려움</button>
+                    <div class="s-seg">
+                        <button class="s-seg-btn active" onclick="selectSettingSeg(this)">쉬움</button>
+                        <button class="s-seg-btn" onclick="selectSettingSeg(this)">보통</button>
+                        <button class="s-seg-btn" onclick="selectSettingSeg(this)">어려움</button>
                     </div>
                 </div>
-                <div class="setting-row">
-                    <div class="setting-info">
-                        <span class="setting-label">힌트 보기</span>
-                        <span class="setting-desc">문제 풀 때 힌트를 보여줘요</span>
+                <div class="s-row">
+                    <div class="s-info">
+                        <span class="s-label">힌트 보기</span>
+                        <span class="s-desc">문제 풀 때 힌트를 보여줘요</span>
                     </div>
-                    <label class="toggle">
+                    <label class="s-toggle">
                         <input type="checkbox" checked>
-                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        <span class="s-track"><span class="s-thumb"></span></span>
                     </label>
                 </div>
-                <div class="setting-row">
-                    <div class="setting-info">
-                        <span class="setting-label">타이머</span>
-                        <span class="setting-desc">제한 시간을 표시해요</span>
+                <div class="s-row">
+                    <div class="s-info">
+                        <span class="s-label">타이머</span>
+                        <span class="s-desc">제한 시간을 표시해요</span>
                     </div>
-                    <label class="toggle">
+                    <label class="s-toggle">
                         <input type="checkbox">
-                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        <span class="s-track"><span class="s-thumb"></span></span>
                     </label>
                 </div>
             </div>
 
             <!-- 탭 패널: 소리 -->
-            <div id="tab-sound" class="tab-panel">
-                <div class="setting-row">
-                    <div class="setting-info">
-                        <span class="setting-label">효과음</span>
-                        <span class="setting-desc">버튼 클릭·정답 효과음</span>
+            <div id="stab-sound" class="s-tab-panel">
+                <div class="s-row">
+                    <div class="s-info">
+                        <span class="s-label">효과음</span>
+                        <span class="s-desc">버튼 클릭·정답 효과음</span>
                     </div>
-                    <label class="toggle">
+                    <label class="s-toggle">
                         <input type="checkbox" checked>
-                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        <span class="s-track"><span class="s-thumb"></span></span>
                     </label>
                 </div>
-                <div class="setting-row">
-                    <div class="setting-info">
-                        <span class="setting-label">배경음악</span>
-                        <span class="setting-desc">게임 중 배경음악을 틀어요</span>
+                <div class="s-row">
+                    <div class="s-info">
+                        <span class="s-label">배경음악</span>
+                        <span class="s-desc">게임 중 배경음악을 틀어요</span>
                     </div>
-                    <label class="toggle">
+                    <label class="s-toggle">
                         <input type="checkbox" checked>
-                        <span class="toggle-track"><span class="toggle-thumb"></span></span>
+                        <span class="s-track"><span class="s-thumb"></span></span>
                     </label>
                 </div>
-                <div class="setting-row column">
-                    <div class="setting-info">
-                        <span class="setting-label">전체 볼륨</span>
-                        <span class="setting-desc">소리 크기를 조절해요</span>
+                <div class="s-row s-row-col">
+                    <div class="s-info">
+                        <span class="s-label">전체 볼륨</span>
+                        <span class="s-desc">소리 크기를 조절해요</span>
                     </div>
-                    <div class="slider-wrap">
-                        <span class="slider-icon">🔈</span>
-                        <input type="range" class="slider" min="0" max="100" value="70">
-                        <span class="slider-icon">🔊</span>
+                    <div class="s-slider-wrap">
+                        <span class="s-slider-icon">🔈</span>
+                        <input type="range" class="s-slider" min="0" max="100" value="70">
+                        <span class="s-slider-icon">🔊</span>
                     </div>
                 </div>
             </div>
 
             <!-- 탭 패널: 계정 -->
-            <div id="tab-account" class="tab-panel">
-                <div class="setting-row">
-                    <div class="setting-info">
-                        <span class="setting-label">이름</span>
-                        <span class="setting-desc">프로필에 표시되는 이름</span>
+            <div id="stab-account" class="s-tab-panel">
+                <div class="s-row">
+                    <div class="s-info">
+                        <span class="s-label">이름</span>
+                        <span class="s-desc">프로필에 표시되는 이름</span>
                     </div>
-                    <input type="text" class="inline-input" placeholder="이름 입력">
+                    <input type="text" class="s-input" placeholder="이름 입력">
                 </div>
-                <div class="setting-row">
-                    <div class="setting-info">
-                        <span class="setting-label">아바타 변경</span>
-                        <span class="setting-desc">캐릭터를 다시 골라요</span>
+                <div class="s-row">
+                    <div class="s-info">
+                        <span class="s-label">아바타 변경</span>
+                        <span class="s-desc">캐릭터를 다시 골라요</span>
                     </div>
-                    <button class="link-btn" onclick="location.href='avatar.html'">변경 →</button>
+                    <button class="s-link-btn" onclick="location.href='avatar.html'">변경 →</button>
                 </div>
-                <div class="setting-row">
-                    <div class="setting-info">
-                        <span class="setting-label">기록 초기화</span>
-                        <span class="setting-desc">모든 학습 기록을 지워요</span>
+                <div class="s-row">
+                    <div class="s-info">
+                        <span class="s-label">기록 초기화</span>
+                        <span class="s-desc">모든 학습 기록을 지워요</span>
                     </div>
-                    <button class="danger-btn">초기화</button>
+                    <button class="s-danger-btn">초기화</button>
                 </div>
             </div>
 
             <!-- 푸터 -->
-            <div class="modal-footer">
-                <button class="save-btn" onclick="closeModal()">저장하기</button>
+            <div class="s-modal-footer">
+                <button class="s-save-btn" onclick="closeModal()">저장하기</button>
             </div>
 
         </div>
     </div>
 
-    <script src="profile.js"></script>
+    <script>
+        // ── 사이드바 선택 ──
+        const areaData = {
+            '전두엽': { streak: 7, complete: 42, challenge: 18, play: 60, good: '전두엽', goodPct: 82, bad: '소뇌',   badPct: 38, ratio: '1.5', prevScore: 40, thisScore: 60, scores: [55,60,58,70,65,75,60], prevScores: [40,42,38,45,50,42,40] },
+            '소뇌':  { streak: 3, complete: 28, challenge: 10, play: 38, good: '소뇌',   goodPct: 65, bad: '측두엽', badPct: 44, ratio: '1.2', prevScore: 35, thisScore: 42, scores: [40,38,42,45,50,44,42], prevScores: [30,32,28,35,38,34,35] },
+            '해마':   { streak: 5, complete: 35, challenge: 14, play: 49, good: '해마',   goodPct: 75, bad: '두정엽', badPct: 50, ratio: '1.3', prevScore: 50, thisScore: 65, scores: [58,62,60,68,65,72,65], prevScores: [48,50,46,52,55,50,50] },
+            '후두엽': { streak: 1, complete: 15, challenge: 6,  play: 21, good: '후두엽', goodPct: 60, bad: '해마',   badPct: 48, ratio: '1.1', prevScore: 38, thisScore: 42, scores: [40,38,44,42,46,44,42], prevScores: [36,34,38,36,40,38,38] },
+            '두정엽': { streak: 2, complete: 20, challenge: 8,  play: 28, good: '두정엽', goodPct: 70, bad: '전두엽', badPct: 55, ratio: '1.1', prevScore: 45, thisScore: 50, scores: [48,50,52,55,50,54,50], prevScores: [42,44,40,46,48,44,45] },
+        };
+
+        let currentArea = '전두엽';
+
+        function selectArea(el, area) {
+            document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
+            currentArea = area;
+            updateStats(area);
+        }
+
+        function updateStats(area) {
+            const d = areaData[area];
+            document.getElementById('area-title').textContent = `${area}에서는 연속훈련 D+${d.streak}`;
+            document.getElementById('training-area').textContent = area;
+            document.getElementById('training-badge').textContent = `연속훈련 D+${d.streak}`;
+            document.getElementById('stat-complete').innerHTML = `${d.complete}<span>H</span>`;
+            document.getElementById('stat-challenge').innerHTML = `${d.challenge}<span>H</span>`;
+            document.getElementById('stat-play').innerHTML = `${d.play}<span>회</span>`;
+            document.getElementById('good-area').textContent = d.good;
+            document.getElementById('bad-area').textContent = d.bad;
+            document.getElementById('good-bar').style.width = d.goodPct + '%';
+            document.getElementById('bad-bar').style.width = d.badPct + '%';
+            document.querySelector('.compare-num').textContent = `약 ${d.ratio}배`;
+            buildChart(d.scores, d.prevScores);
+        }
+
+        // ── 차트 ──
+        function buildChart(scores, prevScores) {
+            const days = ['월','화','수','목','금','토','일'];
+            const max = Math.max(...scores, ...prevScores) * 1.1;
+            const area = document.getElementById('chart-area');
+            area.innerHTML = '';
+            days.forEach((day, i) => {
+                const col = document.createElement('div');
+                col.className = 'bar-col';
+
+                const thisH = Math.round((scores[i] / max) * 90);
+                const prevH = Math.round((prevScores[i] / max) * 90);
+
+                col.innerHTML = `
+                    <div style="display:flex; align-items:flex-end; gap:3px; height:90px;">
+                        <div class="bar prev" style="height:${prevH}px; flex:1;"></div>
+                        <div class="bar this" style="height:${thisH}px; flex:1;"></div>
+                    </div>
+                    <div class="bar-label">${day}</div>
+                `;
+                area.appendChild(col);
+            });
+        }
+
+        // ── 설정 모달 ──
+        function openSettingsModal() {
+            const m = document.getElementById('modal');
+            m.style.display = 'flex';
+            requestAnimationFrame(() => m.classList.add('open'));
+        }
+        function closeModal() {
+            const m = document.getElementById('modal');
+            m.classList.remove('open');
+            m.style.display = 'none';
+        }
+        function handleBackdrop(e) {
+            if (e.target === document.getElementById('modal')) closeModal();
+        }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+        function switchSettingTab(tabId, btnEl) {
+            document.querySelectorAll('.s-tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.s-tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('stab-' + tabId).classList.add('active');
+            btnEl.classList.add('active');
+        }
+        function selectSettingSeg(btnEl) {
+            btnEl.closest('.s-seg').querySelectorAll('.s-seg-btn').forEach(b => b.classList.remove('active'));
+            btnEl.classList.add('active');
+        }
+
+        // ── 초기화 ──
+        buildChart(areaData['전두엽'].scores, areaData['전두엽'].prevScores);
+    </script>
 </body>
 </html>
