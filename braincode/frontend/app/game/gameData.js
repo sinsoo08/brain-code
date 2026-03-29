@@ -1320,7 +1320,16 @@ export const defaultStats = () => ({
   },
 });
 
-export const defaultSettings = () => ({ effectText: "on", resultHint: "on" });
+export const defaultSettings = () => ({
+  effectText: "on",
+  resultHint: "on",
+  difficulty: "쉬움",
+  hint: true,
+  timer: false,
+  voiceEnabled: true,
+  selectedVoice: "",
+  volume: 70,
+});
 
 export const defaultTodayScores = () => ({
   frontal: 0,

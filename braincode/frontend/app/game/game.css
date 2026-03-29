@@ -23,22 +23,6 @@
       transparent 50%
     );
 }
-.game-page::before {
-  content: "";
-  position: fixed;
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 0;
-  width: 480px;
-  height: 480px;
-  top: -140px;
-  left: -140px;
-  background: radial-gradient(
-    circle,
-    rgba(74, 126, 199, 0.12),
-    transparent 70%
-  );
-}
 
 /* ── 네비게이션 바 ── */
 .game-page .navbar {
@@ -249,12 +233,12 @@
 /* ── 게임 셸 (흰 영역) ── */
 .game-page .game-shell {
   background: white;
-  padding: 36px 40px 44px;
-  height: 460px;
+  padding: 24px 40px 32px;
+  height: calc(100vh - 185px);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   align-items: center;
   justify-content: center;
 }
@@ -280,7 +264,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 22px;
+  gap: 16px;
   text-align: center;
 }
 
@@ -402,8 +386,8 @@
 .game-page .visual-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  max-width: 300px;
+  gap: 8px;
+  max-width: 240px;
   width: 100%;
 }
 .game-page .visual-card {

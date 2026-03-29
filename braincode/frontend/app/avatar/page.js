@@ -76,6 +76,17 @@ export default function AvatarPage() {
     <div className="avatar-page">
       <div className="form-card">
         <div className="card-header">
+          <button
+            type="button"
+            onClick={() => router.push("/kid")}
+            style={{
+              background: "none", border: "none", cursor: "pointer",
+              fontSize: "14px", color: "#888", padding: "0 0 8px 0",
+              display: "flex", alignItems: "center", gap: "4px",
+            }}
+          >
+            ← 아이 정보 입력으로
+          </button>
           <h2>아바타 선택</h2>
           <p>나를 대표할 캐릭터를 골라 보세요.</p>
         </div>
