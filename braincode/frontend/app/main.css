@@ -20,14 +20,14 @@
   justify-content: space-between;
   align-items: center;
   background-color: var(--blue-dark);
-  padding: 16px 60px;
+  padding: 14px 40px;
   box-shadow: 0 2px 12px rgba(74, 126, 199, 0.25);
 }
 
 .main-page .nav-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   text-decoration: none;
   color: white;
 }

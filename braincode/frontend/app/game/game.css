@@ -63,19 +63,18 @@
   gap: 8px;
 }
 .game-page .nav-btn {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.18);
+  border: none;
   color: white;
-  font-family: "Noto Sans KR", sans-serif;
+  font-family: "Jua", sans-serif;
   font-size: 15px;
-  font-weight: 500;
-  padding: 8px 20px;
+  padding: 8px 16px;
   border-radius: 20px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.18s;
 }
 .game-page .nav-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.28);
 }
 
 /* ── 페이지 바디 ── */

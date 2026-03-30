@@ -13,19 +13,8 @@ export default function KidPage() {
     birthDate: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
-  const [availableVoices, setAvailableVoices] = useState([]);
-  // selectedVoiceKey: "" = 끄기, "default" = 기본 음성, voice.name = 특정 음성
+  // selectedVoiceKey: "" = 끄기, "default" = 켜기
   const [selectedVoiceKey, setSelectedVoiceKey] = useState("default");
-
-  useEffect(() => {
-    const load = () => {
-      const voices = window.speechSynthesis.getVoices().filter((v) => v.lang.startsWith("ko"));
-      setAvailableVoices(voices);
-    };
-    load();
-    window.speechSynthesis.onvoiceschanged = load;
-    return () => { window.speechSynthesis.onvoiceschanged = null; };
-  }, []);
 
   useEffect(() => {
     try {
@@ -143,37 +132,32 @@ export default function KidPage() {
         </div>
 
         <div className="form-section">
-          <div className="section-label">
-            <div className="icon">🔊</div>
-            음성 설정
-          </div>
-          {[
-            { key: "", label: "사용 안 함", desc: "음성 안내 끄기" },
-            { key: "default", label: "기본 음성", desc: "브라우저 기본 한국어" },
-            ...availableVoices.map((v) => ({ key: v.name, label: v.name, desc: v.lang })),
-          ].map((option) => (
-            <div
-              key={option.key}
-              className="input-group"
-              style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 0", borderBottom: "1px solid #f0f0f0" }}
-            >
-              <div>
-                <span style={{ fontWeight: "600", fontSize: "14px" }}>{option.label}</span>
-                <span style={{ fontSize: "12px", color: "#999", marginLeft: "8px" }}>{option.desc}</span>
-              </div>
-              <label style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "6px" }}>
+          <div className="section-label" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div className="icon">🔊</div>
+              음성 설정
+            </div>
+            <div style={{ display: "flex", gap: "20px" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}>
                 <input
-                  type="checkbox"
-                  checked={selectedVoiceKey === option.key}
-                  onChange={() => saveVoiceKey(option.key)}
-                  style={{ width: "16px", height: "16px" }}
+                  type="radio"
+                  name="voiceSetting"
+                  checked={selectedVoiceKey !== ""}
+                  onChange={() => saveVoiceKey("default")}
                 />
-                <span style={{ fontSize: "13px", color: selectedVoiceKey === option.key ? "#3b82f6" : "#aaa" }}>
-                  {selectedVoiceKey === option.key ? "켜짐" : "꺼짐"}
-                </span>
+                켜기
+              </label>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "14px", fontWeight: "600" }}>
+                <input
+                  type="radio"
+                  name="voiceSetting"
+                  checked={selectedVoiceKey === ""}
+                  onChange={() => saveVoiceKey("")}
+                />
+                끄기
               </label>
             </div>
-          ))}
+          </div>
         </div>
 
         <div className="form-footer">

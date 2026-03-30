@@ -3,8 +3,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import "../progress.css";
 import { SETTINGS_KEY, defaultSettings } from "../game/gameData";
-
-const API_BASE = "http://localhost:8080";
+import { getStats } from "../../apis/sessions";
+import { getMe } from "../../apis/users";
+import { logout } from "../../apis/auth";
 
 const REGION_MAP = {
   FRONTAL:    { name: "전두엽", icon: "🧠" },
@@ -48,18 +49,14 @@ export default function ProgressPage() {
       try { setSettings({ ...defaultSettings(), ...JSON.parse(saved) }); } catch {}
     }
 
-    const token = localStorage.getItem("accessToken");
-    const headers = { Authorization: `Bearer ${token}` };
-
     Promise.all([
-      fetch(`${API_BASE}/api/sessions/stats`, { headers }).then((r) => r.ok ? r.json() : null),
-      fetch(`${API_BASE}/api/users/me`,        { headers }).then((r) => r.ok ? r.json() : null),
+      getStats().catch(() => null),
+      getMe().catch(() => null),
     ])
       .then(([stats, user]) => {
         setStatsData(stats);
         setUserInfo(user);
       })
-      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
@@ -358,6 +355,7 @@ export default function ProgressPage() {
                       checked={settings.hint}
                       onChange={(e) => saveSettings({ ...settings, hint: e.target.checked })}
                     />
+                    <span className="s-track"><span className="s-thumb" /></span>
                   </label>
                 </div>
                 <div className="s-row">
@@ -371,6 +369,7 @@ export default function ProgressPage() {
                       checked={settings.timer}
                       onChange={(e) => saveSettings({ ...settings, timer: e.target.checked })}
                     />
+                    <span className="s-track"><span className="s-thumb" /></span>
                   </label>
                 </div>
               </div>
@@ -389,37 +388,13 @@ export default function ProgressPage() {
                       checked={settings.voiceEnabled}
                       onChange={(e) => saveSettings({ ...settings, voiceEnabled: e.target.checked })}
                     />
+                    <span className="s-track"><span className="s-thumb" /></span>
                   </label>
                 </div>
                 <div className="s-row s-row-col">
                   <div className="s-info">
-                    <span className="s-label">음성 선택</span>
-                    <span className="s-desc">안내 음성을 골라요</span>
-                  </div>
-                  <div style={{ display: "flex", gap: "8px", alignItems: "center", width: "100%" }}>
-                    <select
-                      className="s-select"
-                      style={{ flex: 1, padding: "6px 8px", borderRadius: "8px", border: "1px solid var(--border)", fontSize: "13px" }}
-                      value={settings.selectedVoice}
-                      onChange={(e) => saveSettings({ ...settings, selectedVoice: e.target.value })}
-                    >
-                      <option value="">기본 한국어 음성</option>
-                      {availableVoices.map((v) => (
-                        <option key={v.name} value={v.name}>{v.name}</option>
-                      ))}
-                    </select>
-                    <button
-                      className="s-link-btn"
-                      onClick={() => speak("안녕하세요! 브레인 코드 음성입니다.")}
-                    >
-                      미리 듣기
-                    </button>
-                  </div>
-                </div>
-                <div className="s-row s-row-col">
-                  <div className="s-info">
-                    <span className="s-label">음성 볼륨</span>
-                    <span className="s-desc">소리 크기를 조절해요 ({settings.volume}%)</span>
+                    <span className="s-label">소리 크기</span>
+                    <span className="s-desc">음성 볼륨을 조절해요 ({settings.volume}%)</span>
                   </div>
                   <div className="s-slider-wrap">
                     <span className="s-slider-icon">🔈</span>
@@ -471,13 +446,7 @@ export default function ProgressPage() {
                   <button
                     className="s-link-btn"
                     onClick={async () => {
-                      try {
-                        const token = localStorage.getItem("accessToken");
-                        if (token) await fetch(`${API_BASE}/api/auth/logout`, { method: "POST", headers: { Authorization: `Bearer ${token}` } });
-                      } catch {}
-                      localStorage.removeItem("accessToken");
-                      localStorage.removeItem("isLoggedIn");
-                      localStorage.removeItem("userEmail");
+                      await logout().catch(() => {});
                       router.push("/login");
                     }}
                   >

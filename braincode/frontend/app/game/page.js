@@ -15,8 +15,8 @@ import {
   regionImages,
   temporalWords,
 } from "./gameData";
-
-const API_BASE = "http://localhost:8080";
+import { startSession, endSession } from "../../apis/sessions";
+import { logout } from "../../apis/auth";
 
 const REGION_KEY_TO_ENUM = {
   frontal: "FRONTAL",
@@ -49,12 +49,6 @@ function getDifficultyConfig(difficulty) {
   };
 }
 
-function getAuthHeaders() {
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-  };
-}
 
 function ptsToString(points) {
   return points.map((p) => p.join(",")).join(" ");
@@ -267,15 +261,8 @@ export default function GamePage() {
 
   const apiStartSession = async (regionKey) => {
     try {
-      const res = await fetch(`${API_BASE}/api/sessions/start`, {
-        method: "POST",
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ brainRegion: REGION_KEY_TO_ENUM[regionKey] }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        sessionIdRef.current = data.sessionId;
-      }
+      const data = await startSession({ brainRegion: REGION_KEY_TO_ENUM[regionKey] });
+      sessionIdRef.current = data.sessionId;
     } catch {}
   };
 
@@ -284,16 +271,12 @@ export default function GamePage() {
     if (!sessionId) return;
     sessionIdRef.current = null;
     try {
-      await fetch(`${API_BASE}/api/sessions/${sessionId}/end`, {
-        method: "POST",
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          score: outcome.score,
-          accuracy: outcome.correct ? 100.0 : 0.0,
-          reactionTimeMs: outcome.reaction ?? null,
-          difficulty: DIFFICULTY_LEVEL[difficulty] ?? 1,
-          playTimeSeconds: null,
-        }),
+      await endSession(sessionId, {
+        score: outcome.score,
+        accuracy: outcome.correct ? 100.0 : 0.0,
+        reactionTimeMs: outcome.reaction ?? null,
+        difficulty: DIFFICULTY_LEVEL[difficulty] ?? 1,
+        playTimeSeconds: null,
       });
     } catch {}
   };
@@ -667,8 +650,8 @@ export default function GamePage() {
           <span className="logo-text">브레인 코드</span>
         </button>
         <div className="nav-right">
-          <button className="nav-btn" type="button" onClick={() => router.push("/progress")}>통계</button>
-          <button className="nav-btn" type="button" onClick={() => { setSettingTab("game"); setIsSettingsOpen(true); }}>설정</button>
+          <button className="nav-btn" type="button" onClick={() => router.push("/progress")}>📊 통계</button>
+          <button className="nav-btn" type="button" onClick={() => { setSettingTab("game"); setIsSettingsOpen(true); }}>⚙️ 설정</button>
         </div>
       </nav>
 
@@ -759,234 +742,173 @@ export default function GamePage() {
       </main>
 
       {/* 설정 모달 */}
-      <div
-        className={`modal-backdrop ${isSettingsOpen ? "show" : ""}`}
-        onClick={(e) => { if (e.target === e.currentTarget) setIsSettingsOpen(false); }}
-      >
-        <div className="modal" style={{ maxWidth: "480px", width: "90%" }}>
-          <div className="modal-head">
-            <h3>설정</h3>
-            <button
-              className="btn ghost"
-              style={{ fontSize: "15px", padding: "10px 18px" }}
-              type="button"
-              onClick={() => setIsSettingsOpen(false)}
-            >
-              닫기
-            </button>
-          </div>
-
-          {/* 탭 */}
-          <div style={{ display: "flex", gap: "4px", marginBottom: "16px", borderBottom: "1px solid var(--border)", paddingBottom: "8px" }}>
-            {["game", "sound", "account"].map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => setSettingTab(tab)}
-                style={{
-                  flex: 1, padding: "8px", border: "none", borderRadius: "8px", cursor: "pointer",
-                  background: settingTab === tab ? "var(--blue-pale)" : "transparent",
-                  color: settingTab === tab ? "var(--blue-dark)" : "var(--text-light)",
-                  fontWeight: settingTab === tab ? "700" : "400",
-                  fontSize: "14px",
-                }}
-              >
-                {tab === "game" ? "🎮 게임" : tab === "sound" ? "🔊 소리" : "👤 계정"}
-              </button>
-            ))}
-          </div>
-
-          {settingTab === "game" && (
-            <div className="modal-grid">
-              <div className="setting-item" style={{ gridColumn: "1/-1" }}>
-                <label>난이도</label>
-                <div style={{ display: "flex", gap: "6px" }}>
-                  {["쉬움", "보통", "어려움"].map((d) => (
-                    <button
-                      key={d}
-                      type="button"
-                      onClick={() => setSettings((prev) => ({ ...prev, difficulty: d }))}
-                      style={{
-                        flex: 1, padding: "8px", border: "2px solid",
-                        borderColor: settings.difficulty === d ? "var(--blue-dark)" : "var(--border)",
-                        borderRadius: "8px", cursor: "pointer",
-                        background: settings.difficulty === d ? "var(--blue-pale)" : "transparent",
-                        color: settings.difficulty === d ? "var(--blue-dark)" : "var(--text)",
-                        fontWeight: settings.difficulty === d ? "700" : "400",
-                      }}
-                    >
-                      {d}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="setting-item" style={{ gridColumn: "1/-1", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div style={{ fontWeight: "600" }}>힌트 보기</div>
-                  <div style={{ fontSize: "12px", color: "var(--text-light)" }}>틀렸을 때 정답을 알려줘요</div>
-                </div>
-                <label style={{ cursor: "pointer" }}>
-                  <input
-                    type="checkbox"
-                    checked={settings.hint}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, hint: e.target.checked }))}
-                  />
-                </label>
-              </div>
-              <div className="setting-item" style={{ gridColumn: "1/-1", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div style={{ fontWeight: "600" }}>타이머</div>
-                  <div style={{ fontSize: "12px", color: "var(--text-light)" }}>게임 중 경과 시간을 표시해요</div>
-                </div>
-                <label style={{ cursor: "pointer" }}>
-                  <input
-                    type="checkbox"
-                    checked={settings.timer}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, timer: e.target.checked }))}
-                  />
-                </label>
-              </div>
-              <div className="setting-item">
-                <label htmlFor="effectText">효과 문구</label>
-                <select
-                  className="select"
-                  id="effectText"
-                  value={settings.effectText}
-                  onChange={(e) => setSettings((prev) => ({ ...prev, effectText: e.target.value }))}
-                >
-                  <option value="on">켜기</option>
-                  <option value="off">끄기</option>
-                </select>
-              </div>
-              <div className="setting-item">
-                <label htmlFor="resultHint">결과 통계 문구</label>
-                <select
-                  className="select"
-                  id="resultHint"
-                  value={settings.resultHint}
-                  onChange={(e) => setSettings((prev) => ({ ...prev, resultHint: e.target.value }))}
-                >
-                  <option value="on">켜기</option>
-                  <option value="off">끄기</option>
-                </select>
-              </div>
+      {isSettingsOpen && (
+        <div
+          className="s-modal open"
+          onClick={(e) => { if (e.target.classList.contains("s-modal")) setIsSettingsOpen(false); }}
+        >
+          <div className="s-modal-content">
+            <div className="s-modal-header">
+              <span className="s-modal-title">설정</span>
+              <button className="s-close-btn" type="button" onClick={() => setIsSettingsOpen(false)}>✕</button>
             </div>
-          )}
 
-          {settingTab === "sound" && (
-            <div className="modal-grid">
-              <div className="setting-item" style={{ gridColumn: "1/-1", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div style={{ fontWeight: "600" }}>음성 안내</div>
-                  <div style={{ fontSize: "12px", color: "var(--text-light)" }}>게임 시작·결과 음성</div>
-                </div>
-                <label style={{ cursor: "pointer" }}>
-                  <input
-                    type="checkbox"
-                    checked={settings.voiceEnabled}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, voiceEnabled: e.target.checked }))}
-                  />
-                </label>
-              </div>
-              <div className="setting-item" style={{ gridColumn: "1/-1" }}>
-                <div style={{ fontWeight: "600", marginBottom: "8px" }}>음성 선택</div>
-                <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                  <select
-                    className="select"
-                    style={{ flex: 1 }}
-                    value={settings.selectedVoice}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, selectedVoice: e.target.value }))}
-                  >
-                    <option value="">기본 한국어 음성</option>
-                    {availableVoices.map((v) => (
-                      <option key={v.name} value={v.name}>{v.name}</option>
+            <div className="s-tab-bar">
+              {["game", "sound", "account"].map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  className={`s-tab-btn ${settingTab === tab ? "active" : ""}`}
+                  onClick={() => setSettingTab(tab)}
+                >
+                  <span className="s-tab-icon">{tab === "game" ? "🎮" : tab === "sound" ? "🔊" : "👤"}</span>
+                  <span className="s-tab-label">{tab === "game" ? "게임" : tab === "sound" ? "소리" : "계정"}</span>
+                </button>
+              ))}
+            </div>
+
+            {settingTab === "game" && (
+              <div className="s-tab-panel active">
+                <div className="s-row">
+                  <div className="s-info">
+                    <span className="s-label">난이도</span>
+                    <span className="s-desc">게임 문제의 어려움을 조절해요</span>
+                  </div>
+                  <div className="s-seg">
+                    {["쉬움", "보통", "어려움"].map((d) => (
+                      <button
+                        key={d}
+                        type="button"
+                        className={`s-seg-btn ${settings.difficulty === d ? "active" : ""}`}
+                        onClick={() => setSettings((prev) => ({ ...prev, difficulty: d }))}
+                      >
+                        {d}
+                      </button>
                     ))}
-                  </select>
+                  </div>
+                </div>
+                <div className="s-row">
+                  <div className="s-info">
+                    <span className="s-label">힌트 보기</span>
+                    <span className="s-desc">틀렸을 때 정답을 알려줘요</span>
+                  </div>
+                  <label className="s-toggle">
+                    <input
+                      type="checkbox"
+                      checked={settings.hint}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, hint: e.target.checked }))}
+                    />
+                    <span className="s-track"><span className="s-thumb" /></span>
+                  </label>
+                </div>
+                <div className="s-row">
+                  <div className="s-info">
+                    <span className="s-label">타이머</span>
+                    <span className="s-desc">게임 중 경과 시간을 표시해요</span>
+                  </div>
+                  <label className="s-toggle">
+                    <input
+                      type="checkbox"
+                      checked={settings.timer}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, timer: e.target.checked }))}
+                    />
+                    <span className="s-track"><span className="s-thumb" /></span>
+                  </label>
+                </div>
+              </div>
+            )}
+
+            {settingTab === "sound" && (
+              <div className="s-tab-panel active">
+                <div className="s-row">
+                  <div className="s-info">
+                    <span className="s-label">음성 안내</span>
+                    <span className="s-desc">게임 시작·결과 음성</span>
+                  </div>
+                  <label className="s-toggle">
+                    <input
+                      type="checkbox"
+                      checked={settings.voiceEnabled}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, voiceEnabled: e.target.checked }))}
+                    />
+                    <span className="s-track"><span className="s-thumb" /></span>
+                  </label>
+                </div>
+                <div className="s-row s-row-col">
+                  <div className="s-info">
+                    <span className="s-label">소리 크기</span>
+                    <span className="s-desc">음성 볼륨을 조절해요 ({settings.volume}%)</span>
+                  </div>
+                  <div className="s-slider-wrap">
+                    <span className="s-slider-icon">🔈</span>
+                    <input
+                      type="range"
+                      className="s-slider"
+                      min="0"
+                      max="100"
+                      value={settings.volume}
+                      onChange={(e) => setSettings((prev) => ({ ...prev, volume: Number(e.target.value) }))}
+                    />
+                    <span className="s-slider-icon">🔊</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {settingTab === "account" && (
+              <div className="s-tab-panel active">
+                <div className="s-row">
+                  <div className="s-info">
+                    <span className="s-label">아바타 변경</span>
+                    <span className="s-desc">캐릭터를 다시 골라요</span>
+                  </div>
+                  <button type="button" className="s-link-btn" onClick={() => router.push("/avatar")}>변경 →</button>
+                </div>
+                <div className="s-row">
+                  <div className="s-info">
+                    <span className="s-label">기록 초기화</span>
+                    <span className="s-desc">모든 게임 기록을 지워요</span>
+                  </div>
                   <button
-                    className="btn ghost"
-                    style={{ fontSize: "13px", whiteSpace: "nowrap" }}
                     type="button"
-                    onClick={() => speak("안녕하세요! 브레인 코드 음성입니다.")}
+                    className="s-danger-btn"
+                    onClick={() => {
+                      if (!confirm("정말 초기화할까요? 되돌릴 수 없어요.")) return;
+                      localStorage.removeItem(STORAGE_KEY);
+                      localStorage.removeItem(TODAY_SCORE_KEY);
+                      setStats(defaultStats());
+                      setTodayScores(defaultTodayScores());
+                      setIsSettingsOpen(false);
+                    }}
                   >
-                    미리 듣기
+                    초기화
+                  </button>
+                </div>
+                <div className="s-row">
+                  <div className="s-info">
+                    <span className="s-label">로그아웃</span>
+                    <span className="s-desc">계정에서 로그아웃해요</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="s-link-btn"
+                    onClick={async () => {
+                      await logout().catch(() => {});
+                      router.push("/login");
+                    }}
+                  >
+                    로그아웃
                   </button>
                 </div>
               </div>
-              <div className="setting-item" style={{ gridColumn: "1/-1" }}>
-                <div style={{ fontWeight: "600", marginBottom: "8px" }}>음성 볼륨</div>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <span>🔈</span>
-                  <input
-                    type="range"
-                    className="s-slider"
-                    min="0"
-                    max="100"
-                    value={settings.volume}
-                    onChange={(e) => setSettings((prev) => ({ ...prev, volume: Number(e.target.value) }))}
-                    style={{ flex: 1 }}
-                  />
-                  <span>🔊</span>
-                  <span style={{ minWidth: "32px", textAlign: "right", fontSize: "13px" }}>{settings.volume}%</span>
-                </div>
-              </div>
-            </div>
-          )}
+            )}
 
-          {settingTab === "account" && (
-            <div className="modal-grid">
-              <div className="setting-item" style={{ gridColumn: "1/-1", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div style={{ fontWeight: "600" }}>아바타 변경</div>
-                  <div style={{ fontSize: "12px", color: "var(--text-light)" }}>캐릭터를 다시 골라요</div>
-                </div>
-                <button className="btn ghost" style={{ fontSize: "14px" }} onClick={() => router.push("/avatar")}>변경 →</button>
-              </div>
-              <div className="setting-item" style={{ gridColumn: "1/-1", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div style={{ fontWeight: "600" }}>기록 초기화</div>
-                  <div style={{ fontSize: "12px", color: "var(--text-light)" }}>모든 게임 기록을 지워요</div>
-                </div>
-                <button
-                  className="btn"
-                  style={{ background: "var(--danger)", color: "#fff", border: "none", fontSize: "14px" }}
-                  onClick={() => {
-                    if (!confirm("정말 초기화할까요? 되돌릴 수 없어요.")) return;
-                    localStorage.removeItem(STORAGE_KEY);
-                    localStorage.removeItem(TODAY_SCORE_KEY);
-                    setStats(defaultStats());
-                    setTodayScores(defaultTodayScores());
-                    setIsSettingsOpen(false);
-                  }}
-                >
-                  초기화
-                </button>
-              </div>
-              <div className="setting-item" style={{ gridColumn: "1/-1", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div>
-                  <div style={{ fontWeight: "600" }}>로그아웃</div>
-                  <div style={{ fontSize: "12px", color: "var(--text-light)" }}>계정에서 로그아웃해요</div>
-                </div>
-                <button
-                  className="btn"
-                  style={{ background: "var(--text-light)", color: "#fff", border: "none", fontSize: "14px" }}
-                  onClick={async () => {
-                    try {
-                      const token = localStorage.getItem("accessToken");
-                      if (token) await fetch(`${API_BASE}/api/auth/logout`, { method: "POST", headers: { Authorization: `Bearer ${token}` } });
-                    } catch {}
-                    localStorage.removeItem("accessToken");
-                    localStorage.removeItem("isLoggedIn");
-                    localStorage.removeItem("userEmail");
-                    router.push("/login");
-                  }}
-                >
-                  로그아웃
-                </button>
-              </div>
+            <div className="s-modal-footer">
+              <button type="button" className="s-save-btn" onClick={() => setIsSettingsOpen(false)}>닫기</button>
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
